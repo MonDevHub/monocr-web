@@ -48,8 +48,9 @@ export default defineConfig({
 				dir: 'ltr'
 			},
 			workbox: {
-				globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,avif,jpg,jpeg,json,woff,woff2}'],
+				globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,avif,jpg,jpeg,json,woff,woff2,wasm}'],
 				globIgnores: ['**/node_modules/**/*', '**/.git/**/*'],
+				maximumFileSizeToCacheInBytes: 100 * 1024 * 1024, // 100 MB for WASM files
 				runtimeCaching: [
 					{
 						urlPattern: ({ request }) => request.destination === 'document',
@@ -58,11 +59,13 @@ export default defineConfig({
 							cacheName: 'pages-cache',
 							expiration: {
 								maxEntries: 50,
-								maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+								maxAgeSeconds: 60 * 60 * 24 * 10 // 10 days
 							},
 							cacheableResponse: {
 								statuses: [0, 200]
-							}
+							},
+							// Handle Range requests if ONNX Runtime uses them
+							rangeRequests: true
 						}
 					},
 					{
@@ -72,7 +75,7 @@ export default defineConfig({
 							cacheName: 'google-fonts-cache',
 							expiration: {
 								maxEntries: 10,
-								maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+								maxAgeSeconds: 60 * 60 * 24 * 10 // 10 days
 							},
 							cacheableResponse: {
 								statuses: [0, 200]
@@ -86,7 +89,7 @@ export default defineConfig({
 							cacheName: 'gstatic-fonts-cache',
 							expiration: {
 								maxEntries: 10,
-								maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+								maxAgeSeconds: 60 * 60 * 24 * 10 // 10 days
 							},
 							cacheableResponse: {
 								statuses: [0, 200]
@@ -164,6 +167,10 @@ export default defineConfig({
 	server: {
 		fs: {
 			allow: ['.']
+		},
+		headers: {
+			'Cross-Origin-Opener-Policy': 'same-origin',
+			'Cross-Origin-Embedder-Policy': 'require-corp'
 		}
 	}
 });

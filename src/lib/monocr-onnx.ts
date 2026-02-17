@@ -70,9 +70,9 @@ export class MonOcrOnnx {
 
 	/**
 	 * Preprocess image to match model input requirements:
-	 * - Convert to grayscale
-	 * - Resize to 64px height (maintaining aspect ratio)
+	 * - Resize to 64px height (maintaining aspect ratio) using native Canvas (fast)
 	 * - Pad to 1024px width
+	 * - Convert to grayscale
 	 * - Normalize to [-1, 1]
 	 */
 	private async preprocessImage(imageData: Uint8Array): Promise<Float32Array> {
@@ -80,88 +80,44 @@ export class MonOcrOnnx {
 		const blob = new Blob([imageData as any]);
 		const imageBitmap = await createImageBitmap(blob);
 
-		// Draw to canvas to get pixel data
-		const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
-		const ctx = canvas.getContext('2d')!;
-		ctx.drawImage(imageBitmap, 0, 0);
-		const imageDataObj = ctx.getImageData(0, 0, imageBitmap.width, imageBitmap.height);
+		// Calculate scaled dimensions
+		const scale = this.TARGET_HEIGHT / imageBitmap.height;
+		const scaledWidth = Math.min(Math.round(imageBitmap.width * scale), this.TARGET_WIDTH);
 
-		const { width, height } = imageDataObj;
-		const pixelData = imageDataObj.data;
+		// Use OffscreenCanvas for hardware-accelerated resizing & handling
+		const canvas = new OffscreenCanvas(this.TARGET_WIDTH, this.TARGET_HEIGHT);
+		const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
 
-		// Convert to grayscale
-		const grayData = new Uint8Array(width * height);
-		for (let i = 0; i < width * height; i++) {
-			const offset = i * 4;
-			// Standard RGB to grayscale conversion
-			grayData[i] = Math.round(
-				0.299 * pixelData[offset] + 0.587 * pixelData[offset + 1] + 0.114 * pixelData[offset + 2]
-			);
-		}
+		// Fill with white background (padding)
+		ctx.fillStyle = 'white';
+		ctx.fillRect(0, 0, this.TARGET_WIDTH, this.TARGET_HEIGHT);
 
-		// Resize to target height, maintaining aspect ratio
-		const scale = this.TARGET_HEIGHT / height;
-		const newWidth = Math.min(Math.round(width * scale), this.TARGET_WIDTH);
-		const resized = this.resizeBilinear(grayData, width, height, newWidth, this.TARGET_HEIGHT);
-
-		// Pad to TARGET_WIDTH with white (255)
-		const paddedCanvas = new Float32Array(this.TARGET_HEIGHT * this.TARGET_WIDTH);
-		paddedCanvas.fill(255); // White background
-
-		for (let y = 0; y < this.TARGET_HEIGHT; y++) {
-			for (let x = 0; x < newWidth; x++) {
-				paddedCanvas[y * this.TARGET_WIDTH + x] = resized[y * newWidth + x];
-			}
-		}
-
-		// Normalize to [-1, 1]
-		for (let i = 0; i < paddedCanvas.length; i++) {
-			paddedCanvas[i] = paddedCanvas[i] / 127.5 - 1.0;
-		}
-
+		// Draw image scaled to target height
+		ctx.drawImage(imageBitmap, 0, 0, scaledWidth, this.TARGET_HEIGHT);
 		imageBitmap.close();
-		return paddedCanvas;
-	}
 
-	/**
-	 * Bilinear resize algorithm.
-	 */
-	private resizeBilinear(
-		src: Uint8Array,
-		srcWidth: number,
-		srcHeight: number,
-		dstWidth: number,
-		dstHeight: number
-	): Uint8Array {
-		const dst = new Uint8Array(dstWidth * dstHeight);
-		const xRatio = srcWidth / dstWidth;
-		const yRatio = srcHeight / dstHeight;
+		// Get raw pixel data of the processed (small) image
+		const { data } = ctx.getImageData(0, 0, this.TARGET_WIDTH, this.TARGET_HEIGHT);
 
-		for (let y = 0; y < dstHeight; y++) {
-			for (let x = 0; x < dstWidth; x++) {
-				const srcX = x * xRatio;
-				const srcY = y * yRatio;
-				const x1 = Math.floor(srcX);
-				const y1 = Math.floor(srcY);
-				const x2 = Math.min(x1 + 1, srcWidth - 1);
-				const y2 = Math.min(y1 + 1, srcHeight - 1);
+		// Convert to grayscale and normalize to [-1, 1]
+		const float32Data = new Float32Array(this.TARGET_WIDTH * this.TARGET_HEIGHT);
 
-				const dx = srcX - x1;
-				const dy = srcY - y1;
+		for (let i = 0; i < float32Data.length; i++) {
+			const offset = i * 4;
+			// Extract RGB (ignore Alpha)
+			const r = data[offset];
+			const g = data[offset + 1];
+			const b = data[offset + 2];
 
-				const p1 = src[y1 * srcWidth + x1];
-				const p2 = src[y1 * srcWidth + x2];
-				const p3 = src[y2 * srcWidth + x1];
-				const p4 = src[y2 * srcWidth + x2];
+			// Standard Grayscale: 0.299R + 0.587G + 0.114B
+			// But since we want [-1, 1], we map [0, 255] -> [-1, 1]
+			// (grayscale / 127.5) - 1.0
 
-				const val =
-					p1 * (1 - dx) * (1 - dy) + p2 * dx * (1 - dy) + p3 * (1 - dx) * dy + p4 * dx * dy;
-
-				dst[y * dstWidth + x] = Math.round(val);
-			}
+			const gray = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+			float32Data[i] = gray / 127.5 - 1.0;
 		}
 
-		return dst;
+		return float32Data;
 	}
 
 	/**

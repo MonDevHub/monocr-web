@@ -13,14 +13,14 @@
 
 	const {
 		title = 'MonOCR Web - Private Mon Language OCR',
-		description = 'Fast, privacy-focused Mon language OCR running entirely in your browser using Rust & WebAssembly.',
-		keywords = 'Mon OCR, Mon language, OCR, WebAssembly, Rust, ONNX, Privacy, mnw, text recognition',
+		description = 'Fast, privacy-focused Mon language OCR running entirely in your browser using ONNX Runtime & WebAssembly.',
+		keywords = 'Mon OCR, Mon language, OCR, WebAssembly, ONNX, Privacy, mnw, text recognition',
 		image = '/og-image.png',
 		type = 'website',
 		jsonLd = undefined
 	}: Props = $props();
 
-	const siteUrl = 'https://monocr.pages.dev';
+	const siteUrl = 'https://monocr-web.pages.dev';
 	const canonicalUrl = $derived(`${siteUrl}${$page.url.pathname}`);
 	const imageUrl = $derived(image.startsWith('http') ? image : `${siteUrl}${image}`);
 

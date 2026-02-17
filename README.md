@@ -30,16 +30,55 @@ MonOCR Web brings optical character recognition for the Mon script directly to t
 
 ## Development
 
+### 1. Install Dependencies
+
 ```bash
-# Install dependencies
 pnpm install
+```
 
-# Start development server
+### 2. Prepare Local Assets (WASM)
+
+To run locally, we need to copy the pre-built ONNX Runtime WASM files from `node_modules` to `static/wasm/`.
+
+```bash
+pnpm run copy-wasm
+```
+
+### 3. Start Dev Server
+
+```bash
 pnpm dev
+# Note: This automatically runs copy-wasm before starting
+```
 
-# Build for production
+## Building for Production
+
+To create a production build (static site):
+
+```bash
 pnpm build
 ```
+
+**Note**: The build script automatically removes the large `monocr.onnx` model from the output to comply with Cloudflare's 25MB asset limit. In production, the model is fetched directly from Hugging Face.
+
+## Deployment (Cloudflare Pages)
+
+This project is optimized for **Cloudflare Pages**.
+
+1.  **Build Command**: `pnpm build`
+2.  **Output Directory**: `build`
+3.  **WASM Assets**: Included automatically via `static/wasm/` (ensure these are committed to git).
+4.  **Model**: Served from Hugging Face (configured in `src/lib/config.ts`).
+
+### Manual Deploy (Wrangler)
+
+If you have `wrangler` installed/configured:
+
+```bash
+npx wrangler deploy
+```
+
+(This uses the `wrangler.json` configuration to deploy the `build` folder).
 
 ## License
 
