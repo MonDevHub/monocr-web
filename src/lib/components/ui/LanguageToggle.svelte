@@ -58,7 +58,7 @@
 
 <button
 	onclick={toggleLanguage}
-	class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-md text-fg-secondary transition-all hover:bg-canvas-subtle hover:text-fg-primary focus:outline-none"
+	class="text-fg-secondary hover:bg-canvas-subtle hover:text-fg-primary flex h-10 w-10 cursor-pointer items-center justify-center rounded-md transition-all focus:outline-none"
 	aria-label="Change language (Current: {lang})"
 	type="button"
 	tabindex={disabled ? -1 : 0}

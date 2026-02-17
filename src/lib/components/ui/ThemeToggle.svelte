@@ -7,6 +7,21 @@
 	onMount(() => {
 		if (!browser) return;
 		isDark = document.documentElement.classList.contains('dark');
+
+		const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+		const handleChange = (e: MediaQueryListEvent) => {
+			if (!localStorage.getItem('theme')) {
+				isDark = e.matches;
+				if (isDark) {
+					document.documentElement.classList.add('dark');
+				} else {
+					document.documentElement.classList.remove('dark');
+				}
+			}
+		};
+
+		mediaQuery.addEventListener('change', handleChange);
+		return () => mediaQuery.removeEventListener('change', handleChange);
 	});
 
 	function toggleTheme(): void {
@@ -34,7 +49,7 @@
 
 <button
 	onclick={toggleTheme}
-	class="flex min-h-[44px] min-w-[44px] cursor-pointer touch-manipulation items-center justify-center p-2 text-fg-secondary transition-colors duration-200 hover:text-fg-primary focus:outline-none"
+	class="text-fg-secondary hover:text-fg-primary flex min-h-[44px] min-w-[44px] cursor-pointer touch-manipulation items-center justify-center p-2 transition-colors duration-200 focus:outline-none"
 	aria-label="Toggle {isDark ? 'light' : 'dark'} mode"
 	type="button"
 >

@@ -5,7 +5,6 @@
 export const logger = {
 	log: (...args: unknown[]) => {
 		if (import.meta.env.DEV) {
-			// eslint-disable-next-line no-console
 			console.log(...args);
 		}
 	},
@@ -21,7 +20,6 @@ export const logger = {
 	},
 	debug: (...args: unknown[]) => {
 		if (import.meta.env.DEV) {
-			// eslint-disable-next-line no-console
 			console.debug(...args);
 		}
 	}

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import '../app.css';
-	import '@fontsource/inter/400.css';
-	import '@fontsource/inter/500.css';
-	import '@fontsource/inter/600.css';
-	import '@fontsource/inter/700.css';
-	import '@fontsource/jetbrains-mono/400.css';
-	import '@fontsource/jetbrains-mono/500.css';
+	import '@fontsource/inter/latin-400.css';
+	import '@fontsource/inter/latin-500.css';
+	import '@fontsource/inter/latin-600.css';
+	import '@fontsource/inter/latin-700.css';
+	import '@fontsource/jetbrains-mono/latin-400.css';
+	import '@fontsource/jetbrains-mono/latin-500.css';
 	// @ts-expect-error virtual module
 	import { pwaInfo } from 'virtual:pwa-info';
 
@@ -15,7 +15,7 @@
 
 	import { onMount } from 'svelte';
 	import { logger } from '$lib/logger';
-	import { SEO, Header } from '$lib/components';
+	import { SEO, Header, Footer } from '$lib/components';
 	import { initLanguage } from '$lib/i18n';
 
 	const { children } = $props();
@@ -95,17 +95,20 @@
 <Header />
 
 <div
-	class="selection:text-fg-on-primary min-h-screen bg-canvas text-fg-primary transition-colors duration-500 ease-in-out selection:bg-fg-accent"
+	class="selection:text-fg-on-primary bg-canvas text-fg-primary selection:bg-fg-accent min-h-screen transition-colors duration-500 ease-in-out"
 	lang="en"
 >
-	<div class="mx-auto max-w-3xl px-6 py-8 sm:px-8 md:py-12 lg:px-8 lg:py-16">
+	<div class="mx-auto flex min-h-screen max-w-3xl flex-col px-6 pb-6 pt-24 sm:px-8 md:pb-8 lg:px-8 lg:pb-8">
 		<a
 			href="#main-content"
-			class="focus:text-bg-canvas sr-only transition-all duration-200 focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-sm focus:bg-fg-primary focus:px-4 focus:py-2"
+			class="focus:text-bg-canvas focus:bg-fg-primary sr-only transition-all duration-200 focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-sm focus:px-4 focus:py-2"
 		>
 			Skip to main content
 		</a>
 		<SEO />
-		{@render children?.()}
+		<div class="flex-1">
+			{@render children?.()}
+		</div>
+		<Footer />
 	</div>
 </div>

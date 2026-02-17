@@ -107,13 +107,12 @@
 	class:py-8={!isScrolled}
 >
 	<div class="mx-auto flex max-w-3xl items-baseline justify-between px-6 sm:px-8 lg:px-8">
-		<!-- Empty space for clean header -->
 
 		<!-- Mobile Toggle -->
 		<button
 			bind:this={triggerButton}
 			onclick={toggleSidebar}
-			class="flex min-h-[40px] min-w-[40px] touch-manipulation items-center justify-center rounded-md p-2 text-fg-secondary transition-all hover:bg-canvas-subtle hover:text-fg-primary focus:outline-none md:hidden"
+			class="text-fg-secondary hover:bg-canvas-subtle hover:text-fg-primary flex min-h-[40px] min-w-[40px] touch-manipulation items-center justify-center rounded-md p-2 transition-all focus:outline-none md:hidden"
 			aria-label="Toggle navigation menu"
 			aria-expanded={isSidebarOpen}
 			type="button"
@@ -133,33 +132,33 @@
 		<nav class="ml-auto hidden items-center space-x-6 md:flex" aria-label="Main navigation">
 			<a
 				class="text-sm font-medium transition-colors focus:outline-none {$page.url.pathname ===
+				'/'
+					? 'text-fg-primary'
+					: 'text-fg-secondary hover:text-fg-primary'}"
+				href="/"
+			>
+				Home
+			</a>
+			<a
+				class="text-sm font-medium transition-colors focus:outline-none {$page.url.pathname ===
+				'/docs'
+					? 'text-fg-primary'
+					: 'text-fg-secondary hover:text-fg-primary'}"
+				href="/docs"
+			>
+				Documentation
+			</a>
+			<a
+				class="text-sm font-medium transition-colors focus:outline-none {$page.url.pathname ===
 				'/about'
 					? 'text-fg-primary'
 					: 'text-fg-secondary hover:text-fg-primary'}"
 				href="/about"
 			>
-				{m['nav.about']()}
-			</a>
-			<a
-				class="text-sm font-medium transition-colors focus:outline-none {$page.url.pathname ===
-				'/services'
-					? 'text-fg-primary'
-					: 'text-fg-secondary hover:text-fg-primary'}"
-				href="/services"
-			>
-				{m['nav.services']()}
-			</a>
-			<a
-				class="text-sm font-medium text-fg-secondary transition-colors hover:text-fg-primary focus:outline-none {$page.url.pathname ===
-				'/blog'
-					? 'text-fg-primary'
-					: 'text-fg-secondary hover:text-fg-primary'}"
-				href="/blog"
-			>
-				{m['nav.blog']()}
+				About
 			</a>
 
-			<div class="flex items-center space-x-3 border-l border-border pl-6">
+			<div class="border-border flex items-center space-x-3 border-l pl-6">
 				<LanguageToggle />
 				<ThemeToggle />
 			</div>
@@ -182,7 +181,7 @@
 
 <!-- Mobile Sidebar -->
 <aside
-	class="fixed top-0 left-0 z-[70] h-full w-64 transform border-r border-border bg-canvas shadow-2xl transition-transform duration-300 md:hidden"
+	class="border-border bg-canvas fixed top-0 left-0 z-[70] h-full w-64 transform border-r shadow-2xl transition-transform duration-300 md:hidden"
 	class:translate-x-0={isSidebarOpen}
 	class:-translate-x-full={!isSidebarOpen}
 	aria-hidden={!isSidebarOpen}
@@ -191,7 +190,7 @@
 	<div class="flex h-full flex-col p-6">
 		<button
 			onclick={closeSidebar}
-			class="mb-8 flex min-h-[44px] min-w-[44px] items-center justify-center self-end p-2 text-fg-secondary hover:text-fg-primary"
+			class="text-fg-secondary hover:text-fg-primary mb-8 flex min-h-[44px] min-w-[44px] items-center justify-center self-end p-2"
 			aria-label="Close menu"
 			type="button"
 		>
@@ -207,34 +206,36 @@
 			</svg>
 		</button>
 
-		<nav class="flex flex-col space-y-6 text-lg font-medium text-fg-secondary">
+		<nav class="text-fg-secondary flex flex-col space-y-6 text-lg font-medium">
 			<a
 				onclick={closeSidebar}
-				class="hover:border-fg-border block border-l-2 border-transparent pl-4 hover:text-fg-primary"
-				href="/blog"
+				class="block pl-4 {$page.url.pathname === '/'
+					? 'border-fg-accent text-fg-primary border-l-2 font-semibold'
+					: 'hover:border-fg-border hover:text-fg-primary border-l-2 border-transparent'}"
+				href="/"
 			>
-				{m['nav.blog']()}
+				Home
+			</a>
+			<a
+				onclick={closeSidebar}
+				class="block pl-4 {$page.url.pathname === '/docs'
+					? 'border-fg-accent text-fg-primary border-l-2 font-semibold'
+					: 'hover:border-fg-border hover:text-fg-primary border-l-2 border-transparent'}"
+				href="/docs"
+			>
+				Documentation
 			</a>
 			<a
 				onclick={closeSidebar}
 				class="block pl-4 {$page.url.pathname === '/about'
-					? 'border-l-2 border-fg-accent font-semibold text-fg-primary'
-					: 'hover:border-fg-border border-l-2 border-transparent hover:text-fg-primary'}"
+					? 'border-fg-accent text-fg-primary border-l-2 font-semibold'
+					: 'hover:border-fg-border hover:text-fg-primary border-l-2 border-transparent'}"
 				href="/about"
 			>
-				{m['nav.about']()}
-			</a>
-			<a
-				onclick={closeSidebar}
-				class="block pl-4 {$page.url.pathname === '/services'
-					? 'border-l-2 border-fg-accent font-semibold text-fg-primary'
-					: 'hover:border-fg-border border-l-2 border-transparent hover:text-fg-primary'}"
-				href="/services"
-			>
-				{m['nav.services']()}
+				About
 			</a>
 
-			<div class="mt-auto border-t border-border pt-6">
+			<div class="border-border mt-auto border-t pt-6">
 				<div class="flex items-center justify-start gap-6">
 					<LanguageToggle disabled={!isSidebarOpen} />
 					<ThemeToggle />

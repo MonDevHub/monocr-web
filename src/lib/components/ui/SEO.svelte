@@ -12,15 +12,15 @@
 	}
 
 	const {
-		title = 'SvelteKit Template',
-		description = 'A robust SvelteKit starter template.',
-		keywords = 'SvelteKit, Template, Starter, Web Development',
+		title = 'MonOCR Web - Private Mon Language OCR',
+		description = 'Fast, privacy-focused Mon language OCR running entirely in your browser using Rust & WebAssembly.',
+		keywords = 'Mon OCR, Mon language, OCR, WebAssembly, Rust, ONNX, Privacy, mnw, text recognition',
 		image = '/og-image.png',
 		type = 'website',
 		jsonLd = undefined
 	}: Props = $props();
 
-	const siteUrl = 'https://example.com';
+	const siteUrl = 'https://monocr.pages.dev';
 	const canonicalUrl = $derived(`${siteUrl}${$page.url.pathname}`);
 	const imageUrl = $derived(image.startsWith('http') ? image : `${siteUrl}${image}`);
 
@@ -29,23 +29,23 @@
 		'@graph': [
 			{
 				'@type': 'WebSite',
-				'@id': 'https://example.com/#website',
-				url: 'https://example.com',
-				name: 'SvelteKit Template',
-				description: 'A robust SvelteKit starter template.',
+				'@id': 'https://monocr.pages.dev/#website',
+				url: 'https://monocr.pages.dev',
+				name: 'MonOCR Web',
+				description: 'Fast, privacy-focused Mon language OCR running entirely in your browser.',
 				publisher: {
-					'@id': 'https://example.com/#organization'
+					'@id': 'https://monocr.pages.dev/#organization'
 				},
-				inLanguage: 'en-US'
+				inLanguage: 'mnw'
 			},
 			{
 				'@type': 'Organization',
-				'@id': 'https://example.com/#organization',
-				name: 'Organization Name',
+				'@id': 'https://monocr.pages.dev/#organization',
+				name: 'MonOCR Project',
 				url: siteUrl,
 				logo: {
 					'@type': 'ImageObject',
-					url: `${siteUrl}/logo.png`,
+					url: `${siteUrl}/favicon-512x512.png`,
 					width: 512,
 					height: 512
 				},

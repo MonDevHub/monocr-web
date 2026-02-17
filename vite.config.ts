@@ -3,9 +3,13 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vitest/config';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
+import wasm from 'vite-plugin-wasm';
+import topLevelAwait from 'vite-plugin-top-level-await';
 
 export default defineConfig({
 	plugins: [
+		wasm(),
+		topLevelAwait(),
 		enhancedImages(),
 		tailwindcss(),
 		sveltekit(),
@@ -13,9 +17,9 @@ export default defineConfig({
 			strategies: 'generateSW',
 			registerType: 'autoUpdate',
 			manifest: {
-				name: 'SvelteKit Template',
-				short_name: 'SVK Template',
-				description: 'A robust and feature-rich SvelteKit starter template.',
+				name: 'MonOCR Web',
+				short_name: 'MonOCR',
+				description: 'Offline-capable Mon language OCR running entirely in the browser.',
 				theme_color: '#4338ca',
 				background_color: '#ffffff',
 				display: 'standalone',
@@ -156,5 +160,10 @@ export default defineConfig({
 				}
 			}
 		]
+	},
+	server: {
+		fs: {
+			allow: ['.']
+		}
 	}
 });
