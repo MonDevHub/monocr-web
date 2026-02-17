@@ -69,6 +69,24 @@ export default defineConfig({
 						}
 					},
 					{
+						// Cache the local proxy model and charset
+						urlPattern: ({ url }) => url.pathname.endsWith('monocr.onnx') || url.pathname.endsWith('charset.txt'),
+						handler: 'CacheFirst',
+						options: {
+							cacheName: 'models-cache',
+							expiration: {
+								maxEntries: 5,
+								maxAgeSeconds: 60 * 60 * 24 * 10, // 10 days
+								purgeOnQuotaError: true
+							},
+							cacheableResponse: {
+								statuses: [0, 200]
+							},
+							// Handle Range requests if ONNX Runtime uses them
+							rangeRequests: true
+						}
+					},
+					{
 						urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
 						handler: 'CacheFirst',
 						options: {

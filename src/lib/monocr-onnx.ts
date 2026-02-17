@@ -1,5 +1,7 @@
 import * as ort from 'onnxruntime-web';
 
+import { segmentLines } from './segmentation';
+
 /**
  * ONNX Runtime Web-based OCR engine for Mon language.
  * Supports WebGPU (fastest), WASM with SIMD, and WASM fallback.
@@ -69,50 +71,40 @@ export class MonOcrOnnx {
 	}
 
 	/**
-	 * Preprocess image to match model input requirements:
-	 * - Resize to 64px height (maintaining aspect ratio) using native Canvas (fast)
-	 * - Pad to 1024px width
-	 * - Convert to grayscale
-	 * - Normalize to [-1, 1]
+	 * Process a single text line into model input tensor format.
 	 */
-	private async preprocessImage(imageData: Uint8Array): Promise<Float32Array> {
-		// Decode image using createImageBitmap (async, efficient)
-		const blob = new Blob([imageData as any]);
-		const imageBitmap = await createImageBitmap(blob);
+	private async processLine(
+		source: ImageBitmap,
+		sy: number,
+		sh: number
+	): Promise<Float32Array> {
+		const sw = source.width;
 
 		// Calculate scaled dimensions
-		const scale = this.TARGET_HEIGHT / imageBitmap.height;
-		const scaledWidth = Math.min(Math.round(imageBitmap.width * scale), this.TARGET_WIDTH);
+		const scale = this.TARGET_HEIGHT / sh;
+		const scaledWidth = Math.min(Math.round(sw * scale), this.TARGET_WIDTH);
 
-		// Use OffscreenCanvas for hardware-accelerated resizing & handling
+		// Use OffscreenCanvas
 		const canvas = new OffscreenCanvas(this.TARGET_WIDTH, this.TARGET_HEIGHT);
 		const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
 
-		// Fill with white background (padding)
+		// Fill with white background
 		ctx.fillStyle = 'white';
 		ctx.fillRect(0, 0, this.TARGET_WIDTH, this.TARGET_HEIGHT);
 
-		// Draw image scaled to target height
-		ctx.drawImage(imageBitmap, 0, 0, scaledWidth, this.TARGET_HEIGHT);
-		imageBitmap.close();
+		// Draw cropped and scaled image
+		// drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
+		ctx.drawImage(source, 0, sy, sw, sh, 0, 0, scaledWidth, this.TARGET_HEIGHT);
 
-		// Get raw pixel data of the processed (small) image
 		const { data } = ctx.getImageData(0, 0, this.TARGET_WIDTH, this.TARGET_HEIGHT);
 
-		// Convert to grayscale and normalize to [-1, 1]
+		// Convert to grayscale and normalize
 		const float32Data = new Float32Array(this.TARGET_WIDTH * this.TARGET_HEIGHT);
-
 		for (let i = 0; i < float32Data.length; i++) {
 			const offset = i * 4;
-			// Extract RGB (ignore Alpha)
 			const r = data[offset];
 			const g = data[offset + 1];
 			const b = data[offset + 2];
-
-			// Standard Grayscale: 0.299R + 0.587G + 0.114B
-			// But since we want [-1, 1], we map [0, 255] -> [-1, 1]
-			// (grayscale / 127.5) - 1.0
-
 			const gray = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
 			float32Data[i] = gray / 127.5 - 1.0;
 		}
@@ -173,29 +165,54 @@ export class MonOcrOnnx {
 		console.time('OCR Recognition');
 
 		try {
-			// Preprocess image (async)
-			const inputData = await this.preprocessImage(imageBytes);
-			const inputTensor = new ort.Tensor('float32', inputData, [
-				1,
-				1,
-				this.TARGET_HEIGHT,
-				this.TARGET_WIDTH
-			]);
+			// 1. Decode generic image to Bitmap
+			const blob = new Blob([imageBytes as any]);
+			const fullBitmap = await createImageBitmap(blob);
 
-			// Run inference
-			const feeds = { input: inputTensor };
-			const results = await this.session.run(feeds);
+			// 2. Get pixel data for segmentation
+			// We MUST use a canvas to get ImageData (pixels)
+			const segCanvas = new OffscreenCanvas(fullBitmap.width, fullBitmap.height);
+			const segCtx = segCanvas.getContext('2d', { willReadFrequently: true })!;
+			segCtx.drawImage(fullBitmap, 0, 0);
+			const imageData = segCtx.getImageData(0, 0, fullBitmap.width, fullBitmap.height);
 
-			// Get output tensor
-			const output = results[Object.keys(results)[0]];
-			const outputData = output.data as Float32Array;
-			const outputShape = output.dims as number[];
+			// 3. Segment Lines
+			let segments = segmentLines(imageData);
+			
+			// Fallback: if no segments found (e.g. single large word filling bounds?), use full image
+			if (segments.length === 0) {
+				segments = [{ y: 0, height: fullBitmap.height }];
+			}
+			console.log(`✓ Detected ${segments.length} lines`);
 
-			// Decode predictions
-			const text = this.decodePredictions(outputData, outputShape);
+			const results: string[] = [];
 
+			// 4. Process each line
+			for (const seg of segments) {
+				const inputData = await this.processLine(fullBitmap, seg.y, seg.height);
+				const inputTensor = new ort.Tensor('float32', inputData, [
+					1,
+					1,
+					this.TARGET_HEIGHT,
+					this.TARGET_WIDTH
+				]);
+
+				const feeds = { input: inputTensor };
+				const inferResults = await this.session.run(feeds);
+				const output = inferResults[Object.keys(inferResults)[0]];
+				const text = this.decodePredictions(
+					output.data as Float32Array, 
+					output.dims as number[]
+				);
+				
+				if (text.trim()) {
+					results.push(text);
+				}
+			}
+
+			fullBitmap.close();
 			console.timeEnd('OCR Recognition');
-			return text;
+			return results.join('\n');
 		} catch (error) {
 			console.error('OCR recognition failed:', error);
 			throw error;
