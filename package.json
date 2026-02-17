@@ -84,5 +84,6 @@
 	},
 	"dependencies": {
 		"onnxruntime-web": "^1.24.1"
-	}
+	},
+	"packageManager": "pnpm@10.25.0"
 }
