@@ -14,7 +14,9 @@ if (!fs.existsSync(destDir)) {
 
 // Copy .wasm files
 try {
-    const files = fs.readdirSync(srcDir).filter(file => file.endsWith('.wasm'));
+    const files = fs.readdirSync(srcDir).filter(file => 
+        file.endsWith('.wasm') && !file.includes('asyncify')
+    );
     
     if (files.length === 0) {
         console.warn('No .wasm files found in onnxruntime-web/dist');
