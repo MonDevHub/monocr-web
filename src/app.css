@@ -1,0 +1,270 @@
+/* Google Fonts - loaded in +layout.svelte to avoid CORS issues */
+
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+/* Import custom animations */
+@import './lib/styles/animations.css';
+
+/* Configure dark mode to use class strategy */
+@variant dark (&:is(.dark *));
+
+@layer base {
+	/* ☀️ LIGHT MODE - Professional Paper */
+	:root {
+		/* Backgrounds - Warm & Clean */
+		--bg-canvas: #ffffff;
+		--bg-canvas-subtle: #fafafa;
+		--bg-border: #e4e4e7; /* Zinc 200 */
+
+		/* Text - Softened Contrast */
+		--fg-primary: #18181b; /* Zinc 900 */
+		--fg-secondary: #52525b; /* Zinc 600 */
+		--fg-accent: #27272a; /* Zinc 800 */
+
+		/* Buttons/Interactive */
+		--btn-bg: #f4f4f5; /* Zinc 100 */
+		--btn-border: #e4e4e7;
+		--btn-hover: #e4e4e7;
+
+		/* Text on Primary Background */
+		--fg-on-primary: #ffffff;
+	}
+
+	/* 🌑 DARK MODE - Deep Slate */
+	.dark {
+		/* Backgrounds */
+		--bg-canvas: #09090b; /* Zinc 950 */
+		--bg-canvas-subtle: #18181b; /* Zinc 900 */
+		--bg-border: #27272a; /* Zinc 800 */
+
+		/* Text */
+		--fg-primary: #e4e4e7; /* Zinc 200 */
+		--fg-secondary: #a1a1aa; /* Zinc 400 */
+		--fg-accent: #f4f4f5; /* Zinc 100 */
+
+		/* Buttons/Interactive */
+		--btn-bg: #18181b;
+		--btn-border: #27272a;
+		--btn-hover: #27272a;
+
+		/* Text on Primary Background */
+		--fg-on-primary: #09090b;
+	}
+}
+
+@theme {
+	/* GitHub theme variables mapped to Tailwind utilities */
+	/* These will create utilities like bg-canvas, text-fg-primary, etc. */
+	--color-canvas: var(--bg-canvas);
+	--color-canvas-subtle: var(--bg-canvas-subtle);
+	--color-border: var(--bg-border);
+	--color-fg-primary: var(--fg-primary);
+	--color-fg-secondary: var(--fg-secondary);
+	--color-fg-accent: var(--fg-accent);
+	--color-btn-bg: var(--btn-bg);
+	--color-btn-border: var(--btn-border);
+	--color-btn-hover: var(--btn-hover);
+
+	/* Map GitHub theme to Tailwind utilities for backward compatibility */
+	--color-primary: var(--fg-accent);
+	--color-background-light: var(--bg-canvas);
+	--color-card-light: var(--bg-canvas-subtle);
+	--color-text-light: var(--fg-primary);
+	--color-text-secondary-light: var(--fg-secondary);
+	--color-border-light: var(--bg-border);
+
+	/* Dark mode colors */
+	--color-background-dark: var(--bg-canvas);
+	--color-card-dark: var(--bg-canvas-subtle);
+	--color-text-dark: var(--fg-primary);
+	--color-text-secondary-dark: var(--fg-secondary);
+	--color-border-dark: var(--bg-border);
+	--color-primary-dark: var(--fg-accent);
+
+	/* Fonts */
+	--font-display: 'Inter', sans-serif;
+
+	/* Map to Tailwind utilities - background */
+	--color-background: var(--bg-canvas);
+	--color-foreground: var(--fg-primary);
+
+	/* Map card colors */
+	--color-card: var(--bg-canvas-subtle);
+	--color-card-foreground: var(--fg-primary);
+
+	/* Map border colors */
+	--color-border: var(--bg-border);
+
+	/* Map text colors */
+	--color-muted-foreground: var(--fg-secondary);
+
+	/* Map input colors */
+	--color-input: var(--bg-border);
+
+	/* Map ring/primary */
+	--color-ring: var(--fg-accent);
+}
+
+/* Dark mode overrides for Tailwind compatibility */
+.dark {
+	--color-background: var(--bg-canvas);
+	--color-foreground: var(--fg-primary);
+	--color-card: var(--bg-canvas-subtle);
+	--color-card-foreground: var(--fg-primary);
+	--color-border: var(--bg-border);
+	--color-muted-foreground: var(--fg-secondary);
+	--color-input: var(--bg-border);
+	--color-ring: var(--fg-accent);
+}
+
+/* Custom GitHub theme utility classes */
+@layer utilities {
+	.bg-canvas {
+		background-color: var(--bg-canvas);
+	}
+	.bg-canvas-subtle {
+		background-color: var(--bg-canvas-subtle);
+	}
+	.bg-border {
+		background-color: var(--bg-border);
+	}
+	.text-fg-primary {
+		color: var(--fg-primary);
+	}
+	.text-fg-secondary {
+		color: var(--fg-secondary);
+	}
+	.text-fg-accent {
+		color: var(--fg-accent);
+	}
+	.border-border {
+		border-color: var(--bg-border);
+	}
+	.bg-btn {
+		background-color: var(--btn-bg);
+	}
+	.border-btn {
+		border-color: var(--btn-border);
+	}
+	.hover\:bg-btn-hover:hover {
+		background-color: var(--btn-hover);
+	}
+	.text-on-primary {
+		color: var(--fg-on-primary);
+	}
+}
+
+/* Base styles */
+:root {
+	font-family: var(--font-display);
+	background-color: var(--bg-canvas);
+	color: var(--fg-primary);
+	line-height: 1.6; /* More breathing room */
+	font-feature-settings: 'cv11', 'ss01'; /* Inter features for disambiguation + clearer digits */
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	letter-spacing: -0.02em; /* Tighter headings look more professional */
+	font-weight: 500;
+}
+
+/* Smooth scrolling for anchor links */
+html {
+	scroll-behavior: smooth;
+	background-color: var(--bg-canvas);
+	color: var(--fg-primary);
+	transition:
+		background-color 0.3s,
+		color 0.3s;
+}
+
+/* Smooth transitions */
+body {
+	background-color: var(--bg-canvas);
+	color: var(--fg-primary);
+	font-family: var(--font-display);
+	transition:
+		background-color 0.2s,
+		color 0.2s;
+	min-height: 100vh;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark mode html and body */
+html.dark {
+	background-color: var(--bg-canvas);
+	color: var(--fg-primary);
+}
+
+html.dark body {
+	background-color: var(--bg-canvas);
+	color: var(--fg-primary);
+}
+
+/* Screen reader only utility */
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border-width: 0;
+}
+
+.sr-only.focus\:not-sr-only:focus {
+	position: static;
+	width: auto;
+	height: auto;
+	padding: inherit;
+	margin: inherit;
+	overflow: visible;
+	clip: auto;
+	white-space: normal;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+	width: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--bg-canvas);
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--bg-border);
+	border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--fg-secondary);
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+	background: var(--bg-canvas);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+	background: var(--bg-border);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+	background: var(--fg-secondary);
+}
+
+/* Premium Selection Style */
+::selection {
+	background-color: var(--fg-accent);
+	color: #ffffff;
+}

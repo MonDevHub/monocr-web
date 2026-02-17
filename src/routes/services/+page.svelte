@@ -1,0 +1,29 @@
+<main id="main-content" class="mx-auto max-w-3xl space-y-8 px-6 py-12">
+	<h1 class="text-3xl font-bold">Our Services</h1>
+	<div class="grid gap-6 sm:grid-cols-2">
+		<div class="rounded-lg border border-border p-6">
+			<h3 class="mb-2 text-xl font-semibold">Service One</h3>
+			<p class="text-sm text-fg-secondary">
+				Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+			</p>
+		</div>
+		<div class="rounded-lg border border-border p-6">
+			<h3 class="mb-2 text-xl font-semibold">Service Two</h3>
+			<p class="text-sm text-fg-secondary">
+				Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+			</p>
+		</div>
+		<div class="rounded-lg border border-border p-6">
+			<h3 class="mb-2 text-xl font-semibold">Service Three</h3>
+			<p class="text-sm text-fg-secondary">
+				Ut enim ad minim veniam, quis nostrud exercitation ullamco.
+			</p>
+		</div>
+		<div class="rounded-lg border border-border p-6">
+			<h3 class="mb-2 text-xl font-semibold">Service Four</h3>
+			<p class="text-sm text-fg-secondary">
+				Duis aute irure dolor in reprehenderit in voluptate velit esse.
+			</p>
+		</div>
+	</div>
+</main>

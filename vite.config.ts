@@ -1,0 +1,160 @@
+import { enhancedImages } from '@sveltejs/enhanced-img';
+import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from 'vitest/config';
+import { sveltekit } from '@sveltejs/kit/vite';
+import { SvelteKitPWA } from '@vite-pwa/sveltekit';
+
+export default defineConfig({
+	plugins: [
+		enhancedImages(),
+		tailwindcss(),
+		sveltekit(),
+		SvelteKitPWA({
+			strategies: 'generateSW',
+			registerType: 'autoUpdate',
+			manifest: {
+				name: 'SvelteKit Template',
+				short_name: 'SVK Template',
+				description: 'A robust and feature-rich SvelteKit starter template.',
+				theme_color: '#4338ca',
+				background_color: '#ffffff',
+				display: 'standalone',
+				orientation: 'portrait-primary',
+				icons: [
+					{
+						src: '/android-chrome-192x192.png',
+						sizes: '192x192',
+						type: 'image/png',
+						purpose: 'any maskable'
+					},
+					{
+						src: '/android-chrome-512x512.png',
+						sizes: '512x512',
+						type: 'image/png',
+						purpose: 'any maskable'
+					},
+					{
+						src: '/apple-touch-icon.png',
+						sizes: '180x180',
+						type: 'image/png'
+					}
+				],
+				categories: ['template', 'starter', 'sveltekit'],
+				lang: 'en',
+				dir: 'ltr'
+			},
+			workbox: {
+				globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,avif,jpg,jpeg,json,woff,woff2}'],
+				globIgnores: ['**/node_modules/**/*', '**/.git/**/*'],
+				runtimeCaching: [
+					{
+						urlPattern: ({ request }) => request.destination === 'document',
+						handler: 'StaleWhileRevalidate',
+						options: {
+							cacheName: 'pages-cache',
+							expiration: {
+								maxEntries: 50,
+								maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+							},
+							cacheableResponse: {
+								statuses: [0, 200]
+							}
+						}
+					},
+					{
+						urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+						handler: 'CacheFirst',
+						options: {
+							cacheName: 'google-fonts-cache',
+							expiration: {
+								maxEntries: 10,
+								maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+							},
+							cacheableResponse: {
+								statuses: [0, 200]
+							}
+						}
+					},
+					{
+						urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+						handler: 'CacheFirst',
+						options: {
+							cacheName: 'gstatic-fonts-cache',
+							expiration: {
+								maxEntries: 10,
+								maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+							},
+							cacheableResponse: {
+								statuses: [0, 200]
+							}
+						}
+					}
+				],
+				navigateFallback: '/',
+				navigateFallbackDenylist: [/^\/_/, /\/[^/?]+\.[^/?]+$/],
+				skipWaiting: true,
+				clientsClaim: true
+			},
+			devOptions: {
+				enabled: false,
+				type: 'module'
+			}
+		})
+	],
+	build: {
+		minify: 'terser',
+		target: 'es2022', // Modern target for modern template
+		cssMinify: 'lightningcss',
+		chunkSizeWarningLimit: 1000,
+		terserOptions: {
+			compress: {
+				drop_console: true,
+				drop_debugger: true
+			},
+			format: {
+				comments: false
+			}
+		},
+		modulePreload: {
+			polyfill: false
+		}
+	},
+	optimizeDeps: {
+		include: ['svelte'],
+		exclude: ['@sveltejs/kit'],
+		force: false
+	},
+	ssr: {
+		noExternal: []
+	},
+	test: {
+		expect: { requireAssertions: true },
+		projects: [
+			{
+				extends: './vite.config.ts',
+				test: {
+					name: 'client',
+					environment: 'browser',
+					browser: {
+						enabled: true,
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						provider: 'playwright' as any,
+						instances: [{ browser: 'chromium' }]
+					},
+					include: ['src/**/*.svelte.{test,spec}.{js,ts}'],
+					exclude: ['src/lib/server/**'],
+					setupFiles: ['./vitest-setup-client.ts']
+				}
+			},
+			{
+				extends: './vite.config.ts',
+				test: {
+					name: 'server',
+					environment: 'node',
+					include: ['src/**/*.{test,spec}.{js,ts}'],
+					exclude: ['src/**/*.svelte.{test,spec}.{js,ts}']
+				}
+			}
+		]
+	}
+});
