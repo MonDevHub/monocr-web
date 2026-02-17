@@ -16,9 +16,6 @@ importers:
 
   .:
     dependencies:
-      ocr-engine:
-        specifier: link:ocr-engine/pkg
-        version: link:ocr-engine/pkg
       onnxruntime-web:
         specifier: ^1.24.1
         version: 1.24.1
