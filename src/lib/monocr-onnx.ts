@@ -18,8 +18,6 @@ export class MonOcrOnnx {
 	 * @param charsetPath Path to the charset file
 	 */
 	async initialize(modelPath: string, charsetPath: string): Promise<void> {
-		console.time('ONNX Model Load');
-
 		// Configure ONNX Runtime Wasm paths BEFORE creating session
 		ort.env.wasm.wasmPaths = '/wasm/';
 		ort.env.wasm.numThreads = navigator.hardwareConcurrency || 4;
@@ -35,30 +33,63 @@ export class MonOcrOnnx {
 		};
 
 		try {
-			// Load charset
-			const charsetRes = await fetch(charsetPath);
-			if (!charsetRes.ok) throw new Error(`Failed to load charset: ${charsetRes.statusText}`);
-			this.charset = (await charsetRes.text()).trim();
-			console.log(`✓ Loaded charset: ${this.charset.length} characters`);
+			// Load charset with caching
+			const charsetBuffer = await this.fetchAsset(charsetPath);
+			const decoder = new TextDecoder('utf-8');
+			this.charset = decoder.decode(charsetBuffer).trim();
 
-			// Load ONNX model
-			this.session = await ort.InferenceSession.create(modelPath, sessionOptions);
-			console.log(`✓ ONNX Runtime initialized`);
-			console.timeEnd('ONNX Model Load');
+			// Load ONNX model with Caching strategy
+			const modelBuffer = await this.fetchAsset(modelPath);
+
+			// Init session with buffer
+			this.session = await ort.InferenceSession.create(modelBuffer, sessionOptions);
 
 			// Warm-up inference to JIT-compile kernels
 			await this.warmup();
 		} catch (error) {
-			console.error('ONNX initialization failed:', error);
 			throw error;
 		}
+	}
+
+	/**
+	 * Fetch asset with caching (Cache API) for performance and robustness.
+	 */
+	private async fetchAsset(url: string): Promise<Uint8Array> {
+		const CACHE_NAME = 'monocr-models-v1';
+		try {
+			// Check browser cache first
+			if ('caches' in self) {
+				const cache = await caches.open(CACHE_NAME);
+				const cachedResponse = await cache.match(url);
+
+				if (cachedResponse) {
+					const buffer = await cachedResponse.arrayBuffer();
+					return new Uint8Array(buffer);
+				}
+
+				const response = await fetch(url);
+				if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+
+				// Clone response to put in cache
+				cache.put(url, response.clone());
+
+				const buffer = await response.arrayBuffer();
+				return new Uint8Array(buffer);
+			}
+		} catch (e) {
+			// Squelch cache errors
+		}
+
+		// Fallback: Direct fetch (no cache or cache error)
+		const response = await fetch(url);
+		if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+		return new Uint8Array(await response.arrayBuffer());
 	}
 
 	/**
 	 * Warm-up the model with a dummy input to trigger JIT compilation.
 	 */
 	private async warmup(): Promise<void> {
-		console.time('Model Warmup');
 		const dummyData = new Float32Array(1 * 1 * this.TARGET_HEIGHT * this.TARGET_WIDTH).fill(0);
 		const dummyTensor = new ort.Tensor('float32', dummyData, [
 			1,
@@ -67,7 +98,6 @@ export class MonOcrOnnx {
 			this.TARGET_WIDTH
 		]);
 		await this.session!.run({ input: dummyTensor });
-		console.timeEnd('Model Warmup');
 	}
 
 	/**
@@ -158,8 +188,7 @@ export class MonOcrOnnx {
 			throw new Error('Model not initialized. Call initialize() first.');
 		}
 
-		console.time('OCR Recognition');
-
+		
 		try {
 			// 1. Decode generic image to Bitmap
 			const blob = new Blob([imageBytes as unknown as BlobPart]);
@@ -179,7 +208,6 @@ export class MonOcrOnnx {
 			if (segments.length === 0) {
 				segments = [{ y: 0, height: fullBitmap.height }];
 			}
-			console.log(`✓ Detected ${segments.length} lines`);
 
 			const results: string[] = [];
 
@@ -204,10 +232,8 @@ export class MonOcrOnnx {
 			}
 
 			fullBitmap.close();
-			console.timeEnd('OCR Recognition');
 			return results.join('\n');
 		} catch (error) {
-			console.error('OCR recognition failed:', error);
 			throw error;
 		}
 	}

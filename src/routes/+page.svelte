@@ -113,13 +113,20 @@
 			Mon OCR that runs entirely in your browser — fast, private, and built to help bring Mon texts
 			into the digital world.
 		</p>
+		<p class="text-fg-secondary mx-auto max-w-lg text-xs">
+			<span class="font-semibold">Requirements:</span> Modern browser with Hardware Acceleration (GPU) and 4GB+
+			RAM.
+			<br />
+			The model (58MB) is downloaded once and runs <strong>entirely offline</strong>.
+		</p>
 
 		{#if !engineReady && !error}
 			<div
 				class="inline-flex animate-pulse items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
 			>
-				<div class="h-1.5 w-1.5 rounded-full bg-current"></div>
-				Initializing Engine...
+			>
+				<div class="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+				Downloading Model from Hugging Face... (Please wait)
 			</div>
 		{:else if error}
 			<div
