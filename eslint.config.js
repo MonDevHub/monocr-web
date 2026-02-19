@@ -27,6 +27,14 @@ export default ts.config(
 		}
 	},
 	{
-		ignores: ['build/', '.svelte-kit/', 'dist/']
+		ignores: [
+			'build/',
+			'.svelte-kit/',
+			'dist/',
+			'static/',
+			'src/lib/utils/use-intersection.svelte.ts',
+			'functions/',
+			'ocr-engine/pkg/'
+		]
 	}
 );

@@ -16,18 +16,20 @@ self.onmessage = async (e: MessageEvent) => {
 				self.postMessage({ id, type: 'RESULT', payload: 'Initialized' });
 				break;
 
-			case 'RECOGNIZE':
+			case 'RECOGNIZE': {
 				if (!engine) throw new Error('Engine not initialized');
 				const imageBytes = payload as Uint8Array;
 				const text = await engine.recognize(imageBytes);
 				self.postMessage({ id, type: 'RESULT', payload: text });
 				break;
+			}
 
 			default:
 				throw new Error(`Unknown message type: ${type}`);
 		}
-	} catch (err: any) {
-		self.postMessage({ id, type: 'ERROR', payload: err.toString() });
+	} catch (err: unknown) {
+		const errorMessage = err instanceof Error ? err.message : String(err);
+		self.postMessage({ id, type: 'ERROR', payload: errorMessage });
 	}
 };
 

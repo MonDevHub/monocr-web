@@ -98,7 +98,9 @@
 	class="selection:text-fg-on-primary bg-canvas text-fg-primary selection:bg-fg-accent min-h-screen transition-colors duration-500 ease-in-out"
 	lang="en"
 >
-	<div class="mx-auto flex min-h-screen max-w-3xl flex-col px-6 pb-6 pt-24 sm:px-8 md:pb-8 lg:px-8 lg:pb-8">
+	<div
+		class="mx-auto flex min-h-screen max-w-3xl flex-col px-6 pt-24 pb-6 sm:px-8 md:pb-8 lg:px-8 lg:pb-8"
+	>
 		<a
 			href="#main-content"
 			class="focus:text-bg-canvas focus:bg-fg-primary sr-only transition-all duration-200 focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-sm focus:px-4 focus:py-2"

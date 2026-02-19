@@ -70,7 +70,8 @@ export default defineConfig({
 					},
 					{
 						// Cache the local proxy model and charset
-						urlPattern: ({ url }) => url.pathname.endsWith('monocr.onnx') || url.pathname.endsWith('charset.txt'),
+						urlPattern: ({ url }) =>
+							url.pathname.endsWith('monocr.onnx') || url.pathname.endsWith('charset.txt'),
 						handler: 'CacheFirst',
 						options: {
 							cacheName: 'models-cache',

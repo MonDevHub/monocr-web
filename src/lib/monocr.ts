@@ -8,13 +8,13 @@ type WorkerResponseType = 'RESULT' | 'ERROR';
 interface WorkerMessage {
 	id: string;
 	type: WorkerMessageType;
-	payload: any;
+	payload: unknown;
 }
 
 interface WorkerResponse {
 	id: string;
 	type: WorkerResponseType;
-	payload: any;
+	payload: unknown;
 }
 
 export class OcrError extends Error {
@@ -38,7 +38,10 @@ let worker: Worker | null = null;
 let initPromise: Promise<void> | null = null;
 
 // Map to store pending request resolvers
-const pending = new Map<string, { resolve: (val: any) => void; reject: (err: Error) => void }>();
+const pending = new Map<
+	string,
+	{ resolve: (val: unknown) => void; reject: (err: Error) => void }
+>();
 
 function getWorker(): Worker {
 	if (!worker) {
@@ -49,7 +52,7 @@ function getWorker(): Worker {
 				const { resolve, reject } = pending.get(id)!;
 				pending.delete(id);
 				if (type === 'ERROR') {
-					reject(new OcrError(payload, 'Worker_ERROR'));
+					reject(new OcrError(payload as string, 'Worker_ERROR'));
 				} else {
 					resolve(payload);
 				}
@@ -90,7 +93,7 @@ if (typeof window !== 'undefined') {
 // Update request signature to accept transferables
 function request<T>(
 	type: WorkerMessageType,
-	payload: any,
+	payload: unknown,
 	transferables: Transferable[] = [],
 	timeoutMs = CONFIG.WORKER.TIMEOUT_MS
 ): Promise<T> {
@@ -108,7 +111,7 @@ function request<T>(
 		pending.set(id, {
 			resolve: (val) => {
 				clearTimeout(timer);
-				resolve(val);
+				resolve(val as T);
 			},
 			reject: (err) => {
 				clearTimeout(timer);
@@ -133,11 +136,11 @@ export async function initializeEngine(): Promise<void> {
 				charsetPath: CONFIG.MODELS.CHARSET
 			});
 			console.log('Worker initialized.');
-		} catch (e) {
+		} catch (e: unknown) {
 			initPromise = null; // Allow retry
-			throw e instanceof OcrError
-				? e
-				: new OcrError(`Initialization failed: ${e}`, 'INIT_FAILED', e);
+			const error =
+				e instanceof OcrError ? e : new OcrError(`Initialization failed: ${e}`, 'INIT_FAILED', e);
+			throw error;
 		}
 	})();
 
@@ -148,9 +151,9 @@ export async function recognize(imageBytes: Uint8Array): Promise<string> {
 	try {
 		await initializeEngine();
 		return await request<string>('RECOGNIZE', imageBytes);
-	} catch (e) {
-		throw e instanceof OcrError
-			? e
-			: new OcrError(`Recognition failed: ${e}`, 'RECOGNIZE_FAILED', e);
+	} catch (e: unknown) {
+		const error =
+			e instanceof OcrError ? e : new OcrError(`Recognition failed: ${e}`, 'RECOGNIZE_FAILED', e);
+		throw error;
 	}
 }
