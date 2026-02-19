@@ -73,11 +73,7 @@ export class MonOcrOnnx {
 	/**
 	 * Process a single text line into model input tensor format.
 	 */
-	private async processLine(
-		source: ImageBitmap,
-		sy: number,
-		sh: number
-	): Promise<Float32Array> {
+	private async processLine(source: ImageBitmap, sy: number, sh: number): Promise<Float32Array> {
 		const sw = source.width;
 
 		// Calculate scaled dimensions
@@ -116,7 +112,7 @@ export class MonOcrOnnx {
 	 * Decode CTC predictions using greedy decoding.
 	 */
 	private decodePredictions(logits: Float32Array, shape: number[]): string {
-		const [batchSize, timeSteps, numClasses] = shape;
+		const [, timeSteps, numClasses] = shape;
 
 		// Greedy decoding: argmax along class dimension
 		const predictions: number[] = [];
@@ -166,7 +162,7 @@ export class MonOcrOnnx {
 
 		try {
 			// 1. Decode generic image to Bitmap
-			const blob = new Blob([imageBytes as any]);
+			const blob = new Blob([imageBytes as unknown as BlobPart]);
 			const fullBitmap = await createImageBitmap(blob);
 
 			// 2. Get pixel data for segmentation
@@ -178,7 +174,7 @@ export class MonOcrOnnx {
 
 			// 3. Segment Lines
 			let segments = segmentLines(imageData);
-			
+
 			// Fallback: if no segments found (e.g. single large word filling bounds?), use full image
 			if (segments.length === 0) {
 				segments = [{ y: 0, height: fullBitmap.height }];
@@ -200,11 +196,8 @@ export class MonOcrOnnx {
 				const feeds = { input: inputTensor };
 				const inferResults = await this.session.run(feeds);
 				const output = inferResults[Object.keys(inferResults)[0]];
-				const text = this.decodePredictions(
-					output.data as Float32Array, 
-					output.dims as number[]
-				);
-				
+				const text = this.decodePredictions(output.data as Float32Array, output.dims as number[]);
+
 				if (text.trim()) {
 					results.push(text);
 				}

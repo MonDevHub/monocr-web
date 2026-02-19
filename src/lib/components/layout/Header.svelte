@@ -5,7 +5,6 @@
 	import { page } from '$app/stores';
 	import ThemeToggle from '../ui/ThemeToggle.svelte';
 	import LanguageToggle from '../ui/LanguageToggle.svelte';
-	import * as m from '$lib/paraglide/messages';
 
 	let isSidebarOpen = $state(false);
 	let isMobile = $state(false);
@@ -107,7 +106,6 @@
 	class:py-8={!isScrolled}
 >
 	<div class="mx-auto flex max-w-3xl items-baseline justify-between px-6 sm:px-8 lg:px-8">
-
 		<!-- Mobile Toggle -->
 		<button
 			bind:this={triggerButton}
@@ -131,8 +129,7 @@
 		<!-- Desktop Nav -->
 		<nav class="ml-auto hidden items-center space-x-6 md:flex" aria-label="Main navigation">
 			<a
-				class="text-sm font-medium transition-colors focus:outline-none {$page.url.pathname ===
-				'/'
+				class="text-sm font-medium transition-colors focus:outline-none {$page.url.pathname === '/'
 					? 'text-fg-primary'
 					: 'text-fg-secondary hover:text-fg-primary'}"
 				href="/"

@@ -1,6 +1,6 @@
 export const CONFIG = {
 	MODELS: {
-		RECOGNITION: '/monocr.onnx',
+		RECOGNITION: 'https://huggingface.co/janakhpon/monocr/resolve/main/onnx/monocr.onnx',
 		CHARSET: '/charset.txt'
 	},
 	WORKER: {

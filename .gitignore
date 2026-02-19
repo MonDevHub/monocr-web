@@ -140,3 +140,4 @@ vite.config.ts.timestamp-*
 
 # Adapter-static build output
 build/
+*.onnx

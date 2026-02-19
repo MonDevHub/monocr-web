@@ -1,108 +1,164 @@
 /**
- * Simple Horizontal Projection Profile segmentation for finding text lines.
- * 
+ * Robust Horizontal Projection Profile segmentation for finding text lines.
+ *
  * Algorithm:
  * 1. Convert to grayscale
- * 2. Calculate row density (sum of dark pixels per row)
- * 3. Find valleys (whitespace) to split lines
+ * 2. Adaptive Binarization (handling shadows/uneven lighting)
+ * 3. Calculate row density (sum of text pixels per row)
+ * 4. Smooth profile
+ * 5. Find valleys (whitespace) to split lines with generous padding
  */
 
 export interface LineSegment {
-    y: number;
-    height: number;
-    // We optionally could look for x-bounds too, but usually full width is fine for CRNN
+	y: number;
+	height: number;
+	// Bounding box relative to image
 }
 
 export function segmentLines(
-    imageData: ImageData, 
-    threshold: number = 128, 
-    minLineHeight: number = 10,
-    minGap: number = 5
+	imageData: ImageData,
+	// minLineHeight unused in this robust algo, kept for API compat if needed but removing to fix lint
+
+	smoothKernel: number = 5
 ): LineSegment[] {
-    const { width, height, data } = imageData;
-    const rowDensity = new Int32Array(height);
+	const { width, height, data } = imageData;
+	const grayData = new Uint8Array(width * height);
 
-    // 1. Calculate Horizontal Projection Profile
-    // We want to count *dark* pixels (text)
-    for (let y = 0; y < height; y++) {
-        let darkPixels = 0;
-        for (let x = 0; x < width; x++) {
-            const offset = (y * width + x) * 4;
-            const r = data[offset];
-            const g = data[offset + 1];
-            const b = data[offset + 2];
-            const a = data[offset + 3];
+	// 1. Convert to Grayscale
+	for (let i = 0; i < width * height; i++) {
+		const offset = i * 4;
+		const r = data[offset];
+		const g = data[offset + 1];
+		const b = data[offset + 2];
+		// Standard luma conversion
+		grayData[i] = 0.299 * r + 0.587 * g + 0.114 * b;
+	}
 
-            if (a < 50) continue; // Transparent
+	// 2. Adaptive Thresholding (Integral Image approach for speed)
+	// We want binary: 1 for text (dark), 0 for background (light)
+	// Simple block mean thresholding
+	const binaryData = new Uint8Array(width * height);
+	const windowSize = 25;
+	const C = 10;
 
-            // Grayscale
-            const gray = (r + g + b) / 3;
-            
-            // If dark enough, count it
-            if (gray < threshold) {
-                darkPixels++;
-            }
-        }
-        rowDensity[y] = darkPixels;
-    }
+	// Integral Image for fast local mean
+	const integral = new Uint32Array(width * height);
 
-    // 2. Find connected components in the profile
-    const segments: LineSegment[] = [];
-    let inLine = false;
-    let startY = 0;
+	// Compute Integral Image
+	for (let y = 0; y < height; y++) {
+		let sum = 0;
+		for (let x = 0; x < width; x++) {
+			sum += grayData[y * width + x];
+			if (y === 0) {
+				integral[y * width + x] = sum;
+			} else {
+				integral[y * width + x] = integral[(y - 1) * width + x] + sum;
+			}
+		}
+	}
 
-    // Use a small noise floor - sometimes paper grain causes noise
-    const noiseFloor = width * 0.01; // 1% of width
+	function getSum(x1: number, y1: number, x2: number, y2: number): number {
+		const a = x1 > 0 && y1 > 0 ? integral[(y1 - 1) * width + (x1 - 1)] : 0;
+		const b = y1 > 0 ? integral[(y1 - 1) * width + x2] : 0;
+		const c = x1 > 0 ? integral[y2 * width + (x1 - 1)] : 0;
+		const d = integral[y2 * width + x2];
+		return d - b - c + a;
+	}
 
-    for (let y = 0; y < height; y++) {
-        const isTextRow = rowDensity[y] > noiseFloor;
+	const halfWin = Math.floor(windowSize / 2);
 
-        if (isTextRow && !inLine) {
-            inLine = true;
-            startY = y;
-        } else if (!isTextRow && inLine) {
-            // End of line
-            const h = y - startY;
-            if (h >= minLineHeight) {
-                segments.push({ y: startY, height: h });
-            }
-            inLine = false;
-        }
-    }
+	for (let y = 0; y < height; y++) {
+		for (let x = 0; x < width; x++) {
+			const x1 = Math.max(0, x - halfWin);
+			const y1 = Math.max(0, y - halfWin);
+			const x2 = Math.min(width - 1, x + halfWin);
+			const y2 = Math.min(height - 1, y + halfWin);
 
-    // Catch last line if image ends with text
-    if (inLine) {
-        const h = height - startY;
-        if (h >= minLineHeight) {
-            segments.push({ y: startY, height: h });
-        }
-    }
+			const count = (x2 - x1 + 1) * (y2 - y1 + 1);
+			const sum = getSum(x1, y1, x2, y2);
+			const mean = sum / count;
 
-    // 3. Merge close segments (optional, simpler to just return raw segments first)
-    // If lines are closer than minGap, merge them? 
-    // For now, let's keep them separate as the model probably prefers single lines.
-    
-    // However, sometimes diacritics in Mon styling might cause a tiny gap.
-    // Let's do a simple merge pass:
-    if (segments.length > 1) {
-        const merged: LineSegment[] = [];
-        let current = segments[0];
+			// If pixel is darker than local mean - C, it is text
+			// Text is black (low value), background white (high value)
+			if (grayData[y * width + x] < mean - C) {
+				binaryData[y * width + x] = 1;
+			} else {
+				binaryData[y * width + x] = 0;
+			}
+		}
+	}
 
-        for (let i = 1; i < segments.length; i++) {
-            const next = segments[i];
-            const gap = next.y - (current.y + current.height);
-            
-            if (gap < minGap) {
-                // Merge
-                current.height = (next.y + next.height) - current.y;
-            } else {
-                merged.push(current);
-                current = next;
-            }
-        }
-        merged.push(current);
-        return merged;
-    }
+	// 3. Horizontal Projection Profile
+	const rawHist = new Float32Array(height);
+	for (let y = 0; y < height; y++) {
+		let sum = 0;
+		for (let x = 0; x < width; x++) {
+			sum += binaryData[y * width + x];
+		}
+		rawHist[y] = sum;
+	}
 
-    return segments;
+	// 4. Smooth Histogram (Box filter)
+	const hist = new Float32Array(height);
+	if (smoothKernel > 1) {
+		const halfK = Math.floor(smoothKernel / 2);
+		for (let y = 0; y < height; y++) {
+			let sum = 0;
+			let count = 0;
+			for (let k = -halfK; k <= halfK; k++) {
+				const ky = y + k;
+				if (ky >= 0 && ky < height) {
+					sum += rawHist[ky];
+					count++;
+				}
+			}
+			hist[y] = sum / count;
+		}
+	} else {
+		hist.set(rawHist);
+	}
+
+	// 5. Find Valleys
+	// Max density
+	let maxVal = 0;
+	for (let i = 0; i < height; i++) {
+		if (hist[i] > maxVal) maxVal = hist[i];
+	}
+
+	const threshold = maxVal * 0.02; // 2% threshold ratio
+
+	const segments: LineSegment[] = [];
+	let startY: number | null = null;
+
+	for (let y = 0; y < height; y++) {
+		const isText = hist[y] > threshold;
+
+		if (isText && startY === null) {
+			startY = y;
+		} else if (!isText && startY !== null) {
+			const endY = y;
+
+			if (endY - startY > 8) {
+				// Generous Padding
+				const pad = 4;
+				const y1 = Math.max(0, startY - pad);
+				const y2 = Math.min(height, endY + pad);
+
+				segments.push({ y: y1, height: y2 - y1 });
+			}
+			startY = null;
+		}
+	}
+
+	// Last segment
+	if (startY !== null) {
+		if (height - startY > 8) {
+			const pad = 4;
+			const y1 = Math.max(0, startY - pad);
+			const y2 = Math.min(height, height);
+			segments.push({ y: y1, height: y2 - y1 });
+		}
+	}
+
+	return segments;
 }
