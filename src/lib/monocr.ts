@@ -128,14 +128,14 @@ export async function initializeEngine(): Promise<void> {
 	if (initPromise) return initPromise;
 
 	initPromise = (async () => {
-		console.log('Initializing ONNX Runtime Worker...');
+		// Initializing ONNX Runtime Worker
 		try {
 			// Pass model paths to worker (worker will fetch them)
 			await request('INIT', {
 				modelPath: CONFIG.MODELS.RECOGNITION,
 				charsetPath: CONFIG.MODELS.CHARSET
 			});
-			console.log('Worker initialized.');
+			// Worker initialized
 		} catch (e: unknown) {
 			initPromise = null; // Allow retry
 			const error =
