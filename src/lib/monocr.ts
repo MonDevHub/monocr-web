@@ -36,12 +36,29 @@ export class OcrError extends Error {
 
 let worker: Worker | null = null;
 let initPromise: Promise<void> | null = null;
+let idleTimeoutTimer: ReturnType<typeof setTimeout> | null = null;
+const WORKER_IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
 // Map to store pending request resolvers
 const pending = new Map<
 	string,
 	{ resolve: (val: unknown) => void; reject: (err: Error) => void }
 >();
+
+function clearIdleTimeout(): void {
+	if (idleTimeoutTimer) {
+		clearTimeout(idleTimeoutTimer);
+		idleTimeoutTimer = null;
+	}
+}
+
+function resetIdleTimeout(): void {
+	clearIdleTimeout();
+	idleTimeoutTimer = setTimeout(() => {
+		console.log(`[OCR] Worker idle for ${WORKER_IDLE_TIMEOUT_MS}ms. Terminating to save memory.`);
+		cleanup();
+	}, WORKER_IDLE_TIMEOUT_MS);
+}
 
 function getWorker(): Worker {
 	if (!worker) {
@@ -57,17 +74,22 @@ function getWorker(): Worker {
 					resolve(payload);
 				}
 			}
+			resetIdleTimeout(); // Reset timer on successful worker response
 		};
 		worker.onerror = (e) => {
 			console.error('Worker error:', e);
-			// We might want to reject all pending promises
 			for (const { reject } of pending.values()) {
 				reject(new OcrError('Worker terminated unexpectedly', 'Worker_ERROR'));
 			}
 			pending.clear();
-			worker = null;
+			if (worker) {
+				worker.terminate();
+				worker = null;
+			}
 			initPromise = null;
+			clearIdleTimeout();
 		};
+		resetIdleTimeout(); // Start timer when worker spins up
 	}
 	return worker;
 }
@@ -78,6 +100,8 @@ export function cleanup(): void {
 		worker = null;
 	}
 	initPromise = null;
+	clearIdleTimeout();
+
 	// Reject all pending
 	for (const { reject } of pending.values()) {
 		reject(new OcrError('Cleanup called', 'Worker_ERROR'));
@@ -99,6 +123,8 @@ function request<T>(
 ): Promise<T> {
 	const id = crypto.randomUUID();
 	const w = getWorker();
+
+	resetIdleTimeout(); // Reset timer when a new request is made
 
 	return new Promise<T>((resolve, reject) => {
 		const timer = setTimeout(() => {
@@ -125,7 +151,10 @@ function request<T>(
 }
 
 export async function initializeEngine(): Promise<void> {
-	if (initPromise) return initPromise;
+	if (initPromise) {
+		resetIdleTimeout();
+		return initPromise;
+	}
 
 	initPromise = (async () => {
 		// Initializing ONNX Runtime Worker
