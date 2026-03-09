@@ -1,4 +1,4 @@
-<footer class="mt-auto py-6 text-center text-sm text-slate-400 dark:text-slate-500">
+<footer class="text-fg-secondary mt-auto py-6 text-center text-sm">
 	<div class="space-y-2">
 		<p>
 			&copy; {new Date().getFullYear()} MonOCR Project. Built for the preservation of the Mon language.
@@ -9,14 +9,14 @@
 				href="https://github.com/robertknight/ocrs"
 				target="_blank"
 				rel="noreferrer"
-				class="transition-colors hover:text-slate-600 dark:hover:text-slate-300">ocrs</a
+				class="hover:text-fg-primary transition-colors">ocrs</a
 			>
 			+
 			<a
 				href="https://onnx.ai/"
 				target="_blank"
 				rel="noreferrer"
-				class="transition-colors hover:text-slate-600 dark:hover:text-slate-300">ONNX</a
+				class="hover:text-fg-primary transition-colors">ONNX</a
 			>.
 		</p>
 	</div>

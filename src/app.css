@@ -223,3 +223,12 @@ input[type='button'],
 label {
 	cursor: pointer;
 }
+
+/* iOS Safari Mobile Zoom Fix: Ensure inputs are at least 16px to prevent auto-zoom */
+@media screen and (max-width: 768px) {
+	input,
+	textarea,
+	select {
+		font-size: 16px !important;
+	}
+}

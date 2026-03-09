@@ -10,7 +10,7 @@ MonOCR Web brings optical character recognition for the Mon script directly to t
 
 - **Local Processing**: Runs entirely in the browser using WebAssembly.
 - **Privacy First**: No data collection or server-side processing.
-- **High Performance**: Optimized CRNN models via ONNX Runtime.
+- **High Performance**: Optimized MobileNetV3 + BiLSTM OCR engine via ONNX Runtime (~6.6M parameters).
 - **Mon Language Support**: Specialized for recognizing Mon script.
 
 ## Resources

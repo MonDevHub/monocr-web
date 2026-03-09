@@ -66,8 +66,8 @@
 	},
 	"pnpm": {
 		"onlyBuiltDependencies": [
-			"esbuild",
-			"sharp"
+			"@swc/core",
+			"esbuild"
 		],
 		"overrides": {
 			"seroval": "^1.4.1",
@@ -83,7 +83,7 @@
 		]
 	},
 	"dependencies": {
-		"onnxruntime-web": "^1.24.1"
+		"onnxruntime-web": "^1.14.0"
 	},
 	"packageManager": "pnpm@10.25.0"
 }

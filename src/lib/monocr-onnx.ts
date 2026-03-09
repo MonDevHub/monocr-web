@@ -9,7 +9,7 @@ import { segmentLines } from './segmentation';
 export class MonOcrOnnx {
 	private session: ort.InferenceSession | null = null;
 	private charset: string = '';
-	private readonly TARGET_HEIGHT = 64;
+	private readonly TARGET_HEIGHT = 128;
 	private readonly TARGET_WIDTH = 1024;
 
 	/**
@@ -20,12 +20,32 @@ export class MonOcrOnnx {
 	async initialize(modelPath: string, charsetPath: string): Promise<void> {
 		// Configure ONNX Runtime Wasm paths BEFORE creating session
 		ort.env.wasm.wasmPaths = '/wasm/';
-		ort.env.wasm.numThreads = navigator.hardwareConcurrency || 4;
+
+		// Configure threading based on Cross-Origin Isolation and available hardware concurrency
+		if (typeof self !== 'undefined' && self.crossOriginIsolated && navigator.hardwareConcurrency) {
+			// Use up to 80% of available resources, at least 1
+			const targetThreads = Math.max(1, Math.floor(navigator.hardwareConcurrency * 0.8));
+			ort.env.wasm.numThreads = targetThreads;
+		} else {
+			// Explicitly disable threading since we don't have Cross-Origin Isolation headers
+			ort.env.wasm.numThreads = 1;
+		}
+
+		// Determine supported execution providers
+		const executionProviders: string[] = [];
+		if (
+			typeof navigator !== 'undefined' &&
+			'gpu' in navigator &&
+			(navigator as unknown as { gpu?: unknown }).gpu
+		) {
+			executionProviders.push('webgpu');
+		}
+		executionProviders.push('wasm');
 
 		// Configure ONNX Runtime for optimal performance
 		// Priority: WebGPU > WASM SIMD > WASM
 		const sessionOptions: ort.InferenceSession.SessionOptions = {
-			executionProviders: ['webgpu', 'wasm'],
+			executionProviders,
 			graphOptimizationLevel: 'all',
 			enableCpuMemArena: true,
 			enableMemPattern: true,
@@ -36,17 +56,35 @@ export class MonOcrOnnx {
 			// Load charset with caching
 			const charsetBuffer = await this.fetchAsset(charsetPath);
 			const decoder = new TextDecoder('utf-8');
-			this.charset = decoder.decode(charsetBuffer).trim();
+			this.charset = decoder.decode(charsetBuffer);
 
 			// Load ONNX model with Caching strategy
 			const modelBuffer = await this.fetchAsset(modelPath);
 
-			// Init session with buffer
-			this.session = await ort.InferenceSession.create(modelBuffer, sessionOptions);
+			// Init session with buffer, with automatic fallback mapping
+			try {
+				this.session = await ort.InferenceSession.create(modelBuffer, sessionOptions);
+				// Warm-up inference to JIT-compile kernels
+				await this.warmup();
+			} catch (epError: unknown) {
+				const errorMsg = epError instanceof Error ? epError.message : String(epError);
+				console.warn(
+					`[monocr-onnx] EP Error: ${errorMsg}. Falling back to WASM natively.`,
+					epError
+				);
 
-			// Warm-up inference to JIT-compile kernels
-			await this.warmup();
+				// Fallback strategy if WebGPU completely fails at the EP level
+				const fallbackOptions: ort.InferenceSession.SessionOptions = {
+					...sessionOptions,
+					executionProviders: ['wasm']
+				};
+				this.session = await ort.InferenceSession.create(modelBuffer, fallbackOptions);
+
+				// Warm-up WASM inference
+				await this.warmup();
+			}
 		} catch (error) {
+			console.error('[monocr-onnx] Global Observability: Model initialization failed.', error);
 			throw error;
 		}
 	}
@@ -55,10 +93,21 @@ export class MonOcrOnnx {
 	 * Fetch asset with caching (Cache API) for performance and robustness.
 	 */
 	private async fetchAsset(url: string): Promise<Uint8Array> {
-		const CACHE_NAME = 'monocr-models-v1';
+		const CACHE_NAME = 'monocr-models-v3'; // Bumped version for cache invalidation
+		let cacheError: Error | null = null;
+
 		try {
 			// Check browser cache first
 			if ('caches' in self) {
+				// Cache Invalidation: Clear old caches
+				const cacheKeys = await caches.keys();
+				for (const key of cacheKeys) {
+					if (key.startsWith('monocr-models-') && key !== CACHE_NAME) {
+						console.log(`[monocr-onnx] Invalidating old cache: ${key}`);
+						await caches.delete(key);
+					}
+				}
+
 				const cache = await caches.open(CACHE_NAME);
 				const cachedResponse = await cache.match(url);
 
@@ -71,19 +120,33 @@ export class MonOcrOnnx {
 				if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
 
 				// Clone response to put in cache
-				cache.put(url, response.clone());
+				try {
+					await cache.put(url, response.clone());
+				} catch (e) {
+					cacheError = new Error(`Cache Storage Quota Exceeded or Offline Error: ${e}`);
+				}
 
 				const buffer = await response.arrayBuffer();
 				return new Uint8Array(buffer);
 			}
 		} catch (e) {
-			// Squelch cache errors
+			cacheError = e instanceof Error ? e : new Error(String(e));
 		}
 
 		// Fallback: Direct fetch (no cache or cache error)
-		const response = await fetch(url);
-		if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
-		return new Uint8Array(await response.arrayBuffer());
+		try {
+			const response = await fetch(url);
+			if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+			return new Uint8Array(await response.arrayBuffer());
+		} catch (networkError) {
+			if (cacheError) {
+				throw new Error(
+					`Offline or Storage Limit reached. Cache Error: ${cacheError.message}. Network Error: ${networkError}`,
+					{ cause: networkError }
+				);
+			}
+			throw networkError;
+		}
 	}
 
 	/**
@@ -97,7 +160,20 @@ export class MonOcrOnnx {
 			this.TARGET_HEIGHT,
 			this.TARGET_WIDTH
 		]);
-		await this.session!.run({ input: dummyTensor });
+
+		try {
+			const inputName = this.session!.inputNames[0];
+			const feeds: Record<string, ort.Tensor> = {};
+			feeds[inputName] = dummyTensor;
+			await this.session!.run(feeds);
+		} catch (error: unknown) {
+			const errorMsg = error instanceof Error ? error.message : String(error);
+			console.warn(
+				'[monocr-onnx] Warmup inference failed. Dimensions may be slightly off or WebGPU backend crashed on execution.',
+				errorMsg
+			);
+			throw error;
+		}
 	}
 
 	/**
@@ -188,30 +264,29 @@ export class MonOcrOnnx {
 			throw new Error('Model not initialized. Call initialize() first.');
 		}
 
-		
+		// 1. Decode generic image to Bitmap
+		const blob = new Blob([imageBytes as unknown as BlobPart]);
+		const fullBitmap = await createImageBitmap(blob);
+
+		// 2. Get pixel data for segmentation
+		// We MUST use a canvas to get ImageData (pixels)
+		const segCanvas = new OffscreenCanvas(fullBitmap.width, fullBitmap.height);
+		const segCtx = segCanvas.getContext('2d', { willReadFrequently: true })!;
+		segCtx.drawImage(fullBitmap, 0, 0);
+		const imageData = segCtx.getImageData(0, 0, fullBitmap.width, fullBitmap.height);
+
+		// 3. Segment Lines
+		let segments = segmentLines(imageData);
+
+		// Fallback: if no segments found (e.g. single large word filling bounds?), use full image
+		if (segments.length === 0) {
+			segments = [{ y: 0, height: fullBitmap.height }];
+		}
+
+		const results: string[] = [];
+
+		// 4. Process each line
 		try {
-			// 1. Decode generic image to Bitmap
-			const blob = new Blob([imageBytes as unknown as BlobPart]);
-			const fullBitmap = await createImageBitmap(blob);
-
-			// 2. Get pixel data for segmentation
-			// We MUST use a canvas to get ImageData (pixels)
-			const segCanvas = new OffscreenCanvas(fullBitmap.width, fullBitmap.height);
-			const segCtx = segCanvas.getContext('2d', { willReadFrequently: true })!;
-			segCtx.drawImage(fullBitmap, 0, 0);
-			const imageData = segCtx.getImageData(0, 0, fullBitmap.width, fullBitmap.height);
-
-			// 3. Segment Lines
-			let segments = segmentLines(imageData);
-
-			// Fallback: if no segments found (e.g. single large word filling bounds?), use full image
-			if (segments.length === 0) {
-				segments = [{ y: 0, height: fullBitmap.height }];
-			}
-
-			const results: string[] = [];
-
-			// 4. Process each line
 			for (const seg of segments) {
 				const inputData = await this.processLine(fullBitmap, seg.y, seg.height);
 				const inputTensor = new ort.Tensor('float32', inputData, [
@@ -221,8 +296,11 @@ export class MonOcrOnnx {
 					this.TARGET_WIDTH
 				]);
 
-				const feeds = { input: inputTensor };
-				const inferResults = await this.session.run(feeds);
+				const inputName = this.session!.inputNames[0];
+				const feeds: Record<string, ort.Tensor> = {};
+				feeds[inputName] = inputTensor;
+
+				const inferResults = await this.session!.run(feeds);
 				const output = inferResults[Object.keys(inferResults)[0]];
 				const text = this.decodePredictions(output.data as Float32Array, output.dims as number[]);
 
@@ -230,12 +308,17 @@ export class MonOcrOnnx {
 					results.push(text);
 				}
 			}
-
-			fullBitmap.close();
-			return results.join('\n');
 		} catch (error) {
+			console.error(
+				'[monocr-onnx] Global Observability: Inference run failed. Possible WebGPU/WASM abort.',
+				error
+			);
 			throw error;
+		} finally {
+			fullBitmap.close();
 		}
+
+		return results.join('\n');
 	}
 
 	/**
@@ -243,7 +326,6 @@ export class MonOcrOnnx {
 	 */
 	async dispose(): Promise<void> {
 		if (this.session) {
-			await this.session.release();
 			this.session = null;
 		}
 	}

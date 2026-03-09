@@ -4,6 +4,7 @@
 
 	const dispatch = createEventDispatcher();
 	let isDragging = false;
+	let inputElement: HTMLInputElement;
 
 	function handleDragOver(e: DragEvent) {
 		e.preventDefault();
@@ -27,28 +28,43 @@
 		const target = e.target as HTMLInputElement;
 		if (target.files && target.files.length > 0) {
 			dispatch('file', target.files[0]);
+			// Reset the input so the same file can be selected again
+			target.value = '';
+		}
+	}
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			inputElement?.click();
 		}
 	}
 </script>
 
-<div
-	class="group relative cursor-pointer rounded-xl border-2 border-dashed p-12 text-center transition-all duration-300 ease-in-out
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+<label
+	class="border-border bg-canvas group relative flex min-h-[44px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-12 text-center transition-all duration-300 ease-in-out
            {isDragging
-		? 'border-primary-500 bg-primary-50/10 scale-[1.02]'
-		: 'hover:border-primary-400 border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50'}"
+		? 'scale-[1.02] border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
+		: 'hover:bg-canvas-subtle hover:border-fg-secondary'}"
 	on:dragover={handleDragOver}
 	on:dragleave={handleDragLeave}
 	on:drop={handleDrop}
-	role="button"
 	tabindex="0"
-	on:keypress={() => document.getElementById('fileInput')?.click()}
-	on:click={() => document.getElementById('fileInput')?.click()}
+	on:keydown={handleKeydown}
 >
-	<input type="file" id="fileInput" class="hidden" accept="image/*" on:change={handleFileInput} />
+	<input
+		bind:this={inputElement}
+		type="file"
+		class="sr-only"
+		accept="image/png, image/jpeg, image/webp"
+		on:change={handleFileInput}
+	/>
 
 	<div class="pointer-events-none flex flex-col items-center gap-4">
 		<div
-			class="group-hover:text-primary-500 rounded-full bg-slate-100 p-4 text-slate-500 transition-transform duration-300 group-hover:scale-110 dark:bg-slate-800 dark:text-slate-400"
+			class="bg-canvas-subtle text-fg-secondary group-hover:text-fg-primary rounded-full p-4 transition-transform duration-300 group-hover:scale-110"
 		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -66,15 +82,15 @@
 			</svg>
 		</div>
 		<div class="space-y-1">
-			<p class="text-lg font-medium text-slate-700 dark:text-slate-200">Upload an image</p>
-			<p class="text-sm text-slate-500 dark:text-slate-400">Drag and drop or click to select</p>
+			<p class="text-fg-primary text-lg font-medium">Upload an image</p>
+			<p class="text-fg-secondary text-sm">Drag and drop or click to select</p>
 		</div>
 	</div>
 
 	{#if isDragging}
 		<div
-			class="bg-primary-500/10 pointer-events-none absolute inset-0 rounded-xl"
+			class="pointer-events-none absolute inset-0 rounded-xl bg-blue-500/10 dark:bg-blue-400/10"
 			transition:fade
 		></div>
 	{/if}
-</div>
+</label>
