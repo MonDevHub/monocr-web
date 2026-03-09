@@ -53,6 +53,16 @@ export class MonOcrOnnx {
 		};
 
 		try {
+			// One-time cache invalidation: evict any old monocr-models-* caches
+			if ('caches' in self) {
+				const keys = await caches.keys();
+				await Promise.all(
+					keys
+						.filter((k) => k.startsWith('monocr-models-') && k !== 'monocr-models')
+						.map((k) => caches.delete(k))
+				);
+			}
+
 			// Load charset with caching
 			const charsetBuffer = await this.fetchAsset(charsetPath);
 			const decoder = new TextDecoder('utf-8');
@@ -90,24 +100,16 @@ export class MonOcrOnnx {
 	}
 
 	/**
-	 * Fetch asset with caching (Cache API) for performance and robustness.
+	 * Fetch asset with caching (Cache API) for offline robustness.
+	 * Cache name matches the Workbox SW runtime cache so both paths
+	 * share a single store: Cache API reads → SW writes, and vice-versa.
 	 */
 	private async fetchAsset(url: string): Promise<Uint8Array> {
-		const CACHE_NAME = 'monocr-models-v3'; // Bumped version for cache invalidation
+		const CACHE_NAME = 'monocr-models';
 		let cacheError: Error | null = null;
 
 		try {
-			// Check browser cache first
 			if ('caches' in self) {
-				// Cache Invalidation: Clear old caches
-				const cacheKeys = await caches.keys();
-				for (const key of cacheKeys) {
-					if (key.startsWith('monocr-models-') && key !== CACHE_NAME) {
-						console.log(`[monocr-onnx] Invalidating old cache: ${key}`);
-						await caches.delete(key);
-					}
-				}
-
 				const cache = await caches.open(CACHE_NAME);
 				const cachedResponse = await cache.match(url);
 
@@ -119,11 +121,11 @@ export class MonOcrOnnx {
 				const response = await fetch(url);
 				if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
 
-				// Clone response to put in cache
+				// Store in cache for offline use; ignore quota errors gracefully
 				try {
 					await cache.put(url, response.clone());
 				} catch (e) {
-					cacheError = new Error(`Cache Storage Quota Exceeded or Offline Error: ${e}`);
+					cacheError = new Error(`Cache write failed (quota?): ${e}`);
 				}
 
 				const buffer = await response.arrayBuffer();
@@ -133,7 +135,7 @@ export class MonOcrOnnx {
 			cacheError = e instanceof Error ? e : new Error(String(e));
 		}
 
-		// Fallback: Direct fetch (no cache or cache error)
+		// Fallback: direct fetch (Cache API unavailable or errored)
 		try {
 			const response = await fetch(url);
 			if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
@@ -141,7 +143,7 @@ export class MonOcrOnnx {
 		} catch (networkError) {
 			if (cacheError) {
 				throw new Error(
-					`Offline or Storage Limit reached. Cache Error: ${cacheError.message}. Network Error: ${networkError}`,
+					`Offline — cache unavailable and network failed. Cache error: ${cacheError.message}. Network: ${networkError}`,
 					{ cause: networkError }
 				);
 			}
