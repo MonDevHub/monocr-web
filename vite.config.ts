@@ -48,7 +48,7 @@ export default defineConfig({
 				dir: 'ltr'
 			},
 			workbox: {
-				globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,avif,jpg,jpeg,json,woff,woff2,wasm}'],
+				globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,avif,jpg,jpeg,json,woff,woff2}'],
 				globIgnores: ['**/node_modules/**/*', '**/.git/**/*'],
 				maximumFileSizeToCacheInBytes: 100 * 1024 * 1024, // 100 MB for WASM files
 				runtimeCaching: [
@@ -69,21 +69,55 @@ export default defineConfig({
 						}
 					},
 					{
-						// Cache the local proxy model and charset
-						urlPattern: ({ url }) =>
-							url.pathname.endsWith('monocr.onnx') || url.pathname.endsWith('charset.txt'),
+						// HuggingFace ONNX model (cross-origin full URL match)
+						urlPattern: /huggingface\.co\/.*\.onnx/,
 						handler: 'CacheFirst',
 						options: {
-							cacheName: 'models-cache',
+							cacheName: 'monocr-models',
 							expiration: {
 								maxEntries: 5,
-								maxAgeSeconds: 60 * 60 * 24 * 10, // 10 days
+								maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
 								purgeOnQuotaError: true
 							},
 							cacheableResponse: {
 								statuses: [0, 200]
 							},
-							// Handle Range requests if ONNX Runtime uses them
+							rangeRequests: true
+						}
+					},
+					{
+						// Same-origin charset and any local .onnx
+						urlPattern: ({ url }) =>
+							url.origin === location.origin &&
+							(url.pathname.endsWith('.onnx') || url.pathname.endsWith('charset.txt')),
+						handler: 'CacheFirst',
+						options: {
+							cacheName: 'monocr-models',
+							expiration: {
+								maxEntries: 5,
+								maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+								purgeOnQuotaError: true
+							},
+							cacheableResponse: {
+								statuses: [0, 200]
+							},
+							rangeRequests: true
+						}
+					},
+					{
+						// WASM runtime files loaded dynamically by ONNX Runtime
+						urlPattern: /\/wasm\/.*\.wasm$/,
+						handler: 'CacheFirst',
+						options: {
+							cacheName: 'ort-wasm',
+							expiration: {
+								maxEntries: 10,
+								maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+								purgeOnQuotaError: true
+							},
+							cacheableResponse: {
+								statuses: [0, 200]
+							},
 							rangeRequests: true
 						}
 					},
