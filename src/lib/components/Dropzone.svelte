@@ -58,7 +58,7 @@
 		bind:this={inputElement}
 		type="file"
 		class="sr-only"
-		accept="image/png, image/jpeg, image/webp"
+		accept="image/png, image/jpeg, image/webp, application/pdf"
 		on:change={handleFileInput}
 	/>
 
@@ -82,7 +82,7 @@
 			</svg>
 		</div>
 		<div class="space-y-1">
-			<p class="text-fg-primary text-lg font-medium">Upload an image</p>
+			<p class="text-fg-primary text-lg font-medium">Upload an image or PDF</p>
 			<p class="text-fg-secondary text-sm">Drag and drop or click to select</p>
 		</div>
 	</div>

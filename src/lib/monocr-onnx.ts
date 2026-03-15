@@ -21,29 +21,33 @@ export class MonOcrOnnx {
 		// Configure ONNX Runtime Wasm paths BEFORE creating session
 		ort.env.wasm.wasmPaths = '/wasm/';
 
-		// Configure threading based on Cross-Origin Isolation and available hardware concurrency
-		if (typeof self !== 'undefined' && self.crossOriginIsolated && navigator.hardwareConcurrency) {
-			// Use up to 80% of available resources, at least 1
-			const targetThreads = Math.max(1, Math.floor(navigator.hardwareConcurrency * 0.8));
-			ort.env.wasm.numThreads = targetThreads;
-		} else {
-			// Explicitly disable threading since we don't have Cross-Origin Isolation headers
-			ort.env.wasm.numThreads = 1;
-		}
+		// Explicitly disable multi-threading to avoid conflicts with WebGPU/JSEP
+		// on modern versions of onnxruntime-web (1.24.x)
+		ort.env.wasm.numThreads = 1;
 
 		// Determine supported execution providers
 		const executionProviders: string[] = [];
-		if (
-			typeof navigator !== 'undefined' &&
-			'gpu' in navigator &&
-			(navigator as unknown as { gpu?: unknown }).gpu
-		) {
-			executionProviders.push('webgpu');
+		try {
+			if (
+				typeof navigator !== 'undefined' &&
+				'gpu' in navigator &&
+				(navigator as unknown as { gpu: { requestAdapter: () => Promise<unknown | null> } }).gpu
+			) {
+				// More robust check: try to request an adapter
+				const adapter = await (
+					navigator as unknown as { gpu: { requestAdapter: () => Promise<unknown | null> } }
+				).gpu.requestAdapter();
+				if (adapter) {
+					executionProviders.push('webgpu');
+					console.log('[monocr-onnx] WebGPU support detected and enabled.');
+				}
+			}
+		} catch (e) {
+			console.debug('[monocr-onnx] WebGPU detection failed or not supported:', e);
 		}
 		executionProviders.push('wasm');
 
 		// Configure ONNX Runtime for optimal performance
-		// Priority: WebGPU > WASM SIMD > WASM
 		const sessionOptions: ort.InferenceSession.SessionOptions = {
 			executionProviders,
 			graphOptimizationLevel: 'all',
