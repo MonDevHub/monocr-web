@@ -5,15 +5,16 @@
 	"type": "module",
 	"scripts": {
 		"prepare": "svelte-kit sync || echo ''",
-		"dev": "node scripts/copy-wasm.mjs && paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && vite dev",
+		"dev": "node scripts/copy-wasm.mjs && node scripts/copy-pdf-worker.mjs && paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && vite dev",
 		"start": "vite preview",
 		"preview": "vite preview",
 		"paraglide": "paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide",
 		"copy-wasm": "node scripts/copy-wasm.mjs",
-		"build": "paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && vite build --mode production && rm -f build/monocr.onnx",
-		"build-local": "pnpm run copy-wasm && paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && vite build && rm -f build/monocr.onnx",
-		"build:analyze": "pnpm run copy-wasm && paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && vite build --mode production --analyze",
-		"build:minimal": "pnpm run copy-wasm && NODE_ENV=production paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && vite build --mode production --minify terser",
+		"copy-pdf-worker": "node scripts/copy-pdf-worker.mjs",
+		"build": "node scripts/copy-pdf-worker.mjs && paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && vite build --mode production && rm -f build/monocr.onnx",
+		"build-local": "pnpm run copy-wasm && pnpm run copy-pdf-worker && paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && vite build && rm -f build/monocr.onnx",
+		"build:analyze": "pnpm run copy-wasm && pnpm run copy-pdf-worker && paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && vite build --mode production --analyze",
+		"build:minimal": "pnpm run copy-wasm && pnpm run copy-pdf-worker && NODE_ENV=production paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && vite build --mode production --minify terser",
 		"format": "prettier --write . && eslint --fix .",
 		"format:check": "prettier --check .",
 		"lint": "prettier --check . && eslint .",
@@ -83,7 +84,8 @@
 		]
 	},
 	"dependencies": {
-		"onnxruntime-web": "^1.14.0"
+		"onnxruntime-web": "^1.24.3",
+		"pdfjs-dist": "^4.10.38"
 	},
 	"packageManager": "pnpm@10.25.0"
 }

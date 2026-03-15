@@ -9,7 +9,7 @@ export const CONFIG = {
 	},
 	UI: {
 		MAX_IMAGE_SIZE_MB: 10,
-		ALLOWED_FILE_TYPES: ['image/jpeg', 'image/png', 'image/webp']
+		ALLOWED_FILE_TYPES: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
 	}
 } as const;
 

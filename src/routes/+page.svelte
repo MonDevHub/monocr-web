@@ -4,6 +4,7 @@
 	import Dropzone from '$lib/components/Dropzone.svelte';
 	import { initializeEngine, recognize, cleanup } from '$lib/monocr';
 	import { CONFIG } from '$lib/config';
+	import { renderPdfPage, loadPdf } from '$lib/utils/pdf-util';
 
 	let engineReady = false;
 	let loading = false;
@@ -14,6 +15,9 @@
 	let resultText: string | null = null;
 	let processingTime = 0;
 	let copied = false;
+	let isPdf = false;
+	let processingProgress = '';
+	let totalPages = 0;
 
 	onMount(async () => {
 		try {
@@ -45,11 +49,12 @@
 			return;
 		}
 		if (!(CONFIG.UI.ALLOWED_FILE_TYPES as readonly string[]).includes(newFile.type)) {
-			error = 'Invalid file type. Allowed: JPG, PNG, WEBP';
+			error = 'Invalid file type. Allowed: JPG, PNG, WEBP, PDF';
 			return;
 		}
 
 		file = newFile;
+		isPdf = file.type === 'application/pdf';
 
 		// Reset
 		resultText = null;
@@ -61,9 +66,62 @@
 				// Ignore cleanup errors
 			}
 		}
-		previewUrl = URL.createObjectURL(file);
 
-		processImage();
+		if (isPdf) {
+			processPdf();
+		} else {
+			previewUrl = URL.createObjectURL(file);
+			processImage();
+		}
+	}
+
+	async function processPdf() {
+		if (!file) return;
+
+		try {
+			loading = true;
+			resultText = '';
+			const buffer = await file.arrayBuffer();
+			
+			// Load the PDF once to avoid detaching the buffer multiple times
+			const pdf = await loadPdf(buffer);
+			totalPages = pdf.numPages;
+			
+			const allTexts: string[] = [];
+			const startTime = performance.now();
+			
+			for (let i = 1; i <= totalPages; i++) {
+				processingProgress = `Processing page ${i} of ${totalPages}...`;
+				
+				// 1. Render page using the loaded pdf proxy
+				const { imageBytes } = await renderPdfPage(pdf, i);
+				
+				// 2. Set preview for first page only
+				if (i === 1) {
+					if (previewUrl) URL.revokeObjectURL(previewUrl);
+					const blob = new Blob([imageBytes.buffer as ArrayBuffer], { type: 'image/jpeg' });
+					previewUrl = URL.createObjectURL(blob);
+				}
+				
+				// 3. Run OCR
+				const text = await recognize(imageBytes);
+				if (text.trim()) {
+					allTexts.push(`--- Page ${i} ---\n${text}`);
+				}
+			}
+
+			resultText = allTexts.join('\n\n');
+			const endTime = performance.now();
+			processingTime = Math.round(endTime - startTime);
+			processingProgress = '';
+		} catch (e: unknown) {
+			console.error(e);
+			const msg = e instanceof Error ? e.message : String(e);
+			error = `PDF Processing Failed: ${msg}`;
+			processingProgress = '';
+		} finally {
+			loading = false;
+		}
 	}
 
 	async function processImage() {
@@ -185,10 +243,24 @@
 					</div>
 					<button
 						on:click={reset}
-						class="hover:text-fg-primary hover:decoration-fg-secondary text-fg-secondary decoration-border flex min-h-[44px] items-center self-start text-sm underline underline-offset-4 transition-colors"
-						aria-label="Process another image"
+						class="text-fg-secondary hover:text-fg-primary hover:bg-canvas-subtle border-border flex min-h-[44px] items-center gap-2 rounded-lg border bg-canvas px-4 py-2 text-sm font-medium transition-all"
+						aria-label="Process another image or PDF"
 					>
-						Process another image
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="16"
+							height="16"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+							<path d="M3 3v5h5" />
+						</svg>
+						Process another image/PDF
 					</button>
 				</div>
 
@@ -225,7 +297,9 @@
 									<div
 										class="border-primary-500 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"
 									></div>
-									<span class="text-fg-secondary text-sm font-medium">Scanning...</span>
+									<span class="text-fg-secondary text-sm font-medium">
+										{processingProgress || 'Scanning...'}
+									</span>
 								</div>
 							</div>
 						{/if}
