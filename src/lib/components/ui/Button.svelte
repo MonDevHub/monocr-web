@@ -9,8 +9,8 @@
 
 	const variantClass = $derived(
 		variant === 'primary'
-			? 'min-h-[44px] px-6 py-3 font-medium text-fg-on-primary rounded-lg shadow-md transition-all duration-300 transform bg-fg-accent hover:bg-fg-accent/90 hover:scale-[1.02] active:scale-[0.98] touch-manipulation focus:outline-none focus:ring-2 focus:ring-fg-accent focus:ring-offset-2'
-			: 'min-h-[44px] px-6 py-3 font-medium rounded-lg transition-all duration-300 touch-manipulation focus:outline-none focus:ring-2 focus:ring-fg-accent focus:ring-offset-2'
+			? 'min-h-[44px] px-6 py-3 font-medium text-fg-on-primary rounded-lg shadow-sm transition-all duration-300 transform bg-fg-accent hover:bg-fg-accent/90 hover:scale-[1.01] active:scale-[0.98] touch-manipulation focus:outline-none focus:ring-2 focus:ring-fg-accent/50 focus:ring-offset-2'
+			: 'min-h-[44px] px-6 py-3 font-medium rounded-lg transition-all duration-300 touch-manipulation focus:outline-none focus:ring-2 focus:ring-fg-accent/50 focus:ring-offset-2'
 	);
 
 	const ariaLabel = $derived(href.startsWith('mailto:') ? 'Send email' : undefined);

@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
+	import { m } from '$lib/i18n';
 	import ThemeToggle from '../ui/ThemeToggle.svelte';
 	import LanguageToggle from '../ui/LanguageToggle.svelte';
 
@@ -81,8 +82,6 @@
 	}
 
 	function closeSidebar() {
-		// Return focus to the toggle button before closing
-		// This prevents "aria-hidden" warnings by ensuring focus is not trapped in the hidden sidebar
 		triggerButton?.focus();
 		isSidebarOpen = false;
 	}
@@ -101,11 +100,11 @@
 	class:bg-canvas={isScrolled || isSidebarOpen}
 	class:bg-opacity-90={isScrolled}
 	class:dark:bg-opacity-90={isScrolled}
-	class:backdrop-blur-sm={isScrolled}
-	class:py-4={isScrolled}
-	class:py-8={!isScrolled}
+	class:backdrop-blur-md={isScrolled}
+	class:py-3={isScrolled}
+	class:py-6={!isScrolled}
 >
-	<div class="mx-auto flex max-w-3xl items-baseline justify-between px-6 sm:px-8 lg:px-8">
+	<div class="mx-auto flex items-baseline justify-between px-6 sm:px-8 lg:px-8">
 		<!-- Mobile Toggle -->
 		<button
 			bind:this={triggerButton}
@@ -129,33 +128,42 @@
 		<!-- Desktop Nav -->
 		<nav class="ml-auto hidden items-center space-x-6 md:flex" aria-label="Main navigation">
 			<a
-				class="text-sm font-medium transition-colors focus:outline-none {$page.url.pathname === '/'
+				class="text-[14px] font-medium transition-all duration-200 focus:outline-none active:scale-95 {$page.url.pathname === '/'
 					? 'text-fg-primary'
 					: 'text-fg-secondary hover:text-fg-primary'}"
 				href="/"
 			>
-				Home
+				{m.nav_home()}
 			</a>
 			<a
-				class="text-sm font-medium transition-colors focus:outline-none {$page.url.pathname ===
+				class="text-[14px] font-medium transition-all duration-200 focus:outline-none active:scale-95 {$page.url.pathname ===
 				'/docs'
 					? 'text-fg-primary'
 					: 'text-fg-secondary hover:text-fg-primary'}"
 				href="/docs"
 			>
-				Documentation
+				{m.nav_docs()}
 			</a>
 			<a
-				class="text-sm font-medium transition-colors focus:outline-none {$page.url.pathname ===
-				'/about'
+				class="text-[14px] font-medium transition-all duration-200 focus:outline-none active:scale-95 {$page.url.pathname ===
+				'/report'
 					? 'text-fg-primary'
 					: 'text-fg-secondary hover:text-fg-primary'}"
-				href="/about"
+				href="/report"
 			>
-				About
+				{m.nav_feedback()}
+			</a>
+			<a
+				class="text-[14px] font-medium transition-all duration-200 focus:outline-none active:scale-95 {$page.url.pathname ===
+				'/contribute'
+					? 'text-fg-primary'
+					: 'text-fg-secondary hover:text-fg-primary'}"
+				href="/contribute"
+			>
+				{m.nav_contribute()}
 			</a>
 
-			<div class="border-border flex items-center space-x-3 border-l pl-6">
+			<div class="border-border flex items-center space-x-4 border-l pl-6">
 				<LanguageToggle />
 				<ThemeToggle />
 			</div>
@@ -211,7 +219,7 @@
 					: 'hover:border-fg-border hover:text-fg-primary border-l-2 border-transparent'}"
 				href="/"
 			>
-				Home
+				{m.nav_home()}
 			</a>
 			<a
 				onclick={closeSidebar}
@@ -220,16 +228,25 @@
 					: 'hover:border-fg-border hover:text-fg-primary border-l-2 border-transparent'}"
 				href="/docs"
 			>
-				Documentation
+				{m.nav_docs()}
 			</a>
 			<a
 				onclick={closeSidebar}
-				class="block pl-4 {$page.url.pathname === '/about'
+				class="block pl-4 {$page.url.pathname === '/report'
 					? 'border-fg-accent text-fg-primary border-l-2 font-semibold'
 					: 'hover:border-fg-border hover:text-fg-primary border-l-2 border-transparent'}"
-				href="/about"
+				href="/report"
 			>
-				About
+				{m.nav_feedback()}
+			</a>
+			<a
+				onclick={closeSidebar}
+				class="block pl-4 {$page.url.pathname === '/contribute'
+					? 'border-fg-accent text-fg-primary border-l-2 font-semibold'
+					: 'hover:border-fg-border hover:text-fg-primary border-l-2 border-transparent'}"
+				href="/contribute"
+			>
+				{m.nav_contribute()}
 			</a>
 
 			<div class="border-border mt-auto border-t pt-6">

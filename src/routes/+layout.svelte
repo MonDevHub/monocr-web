@@ -16,7 +16,7 @@
 	import { onMount } from 'svelte';
 	import { logger } from '$lib/logger';
 	import { SEO, Header, Footer } from '$lib/components';
-	import { initLanguage } from '$lib/i18n';
+	import { initLanguage, currentLang } from '$lib/i18n';
 
 	const { children } = $props();
 
@@ -71,6 +71,16 @@
 	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=2" />
 	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2" />
 
+	<!-- Fonts & Icons -->
+	<link
+		href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap"
+		rel="stylesheet"
+	/>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+		rel="stylesheet"
+	/>
+
 	<!-- preload critical fonts -->
 	<link
 		rel="preload"
@@ -96,11 +106,9 @@
 
 <div
 	class="selection:text-fg-on-primary bg-canvas text-fg-primary selection:bg-fg-accent min-h-screen transition-colors duration-500 ease-in-out"
-	lang="en"
+	lang={$currentLang}
 >
-	<div
-		class="mx-auto flex min-h-screen max-w-3xl flex-col px-6 pt-24 pb-6 sm:px-8 md:pb-8 lg:px-8 lg:pb-8"
-	>
+	<div class="mx-auto flex min-h-screen flex-col px-6 pt-24 pb-6 sm:px-8 md:pb-8 lg:px-8 lg:pb-8">
 		<a
 			href="#main-content"
 			class="focus:text-bg-canvas focus:bg-fg-primary sr-only transition-all duration-200 focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-sm focus:px-4 focus:py-2"

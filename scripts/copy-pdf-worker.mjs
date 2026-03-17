@@ -10,18 +10,18 @@ const destDir = path.resolve(__dirname, '../static');
 const destFile = path.resolve(destDir, 'pdf.worker.min.mjs');
 
 if (!fs.existsSync(destDir)) {
-    fs.mkdirSync(destDir, { recursive: true });
+	fs.mkdirSync(destDir, { recursive: true });
 }
 
 try {
-    if (fs.existsSync(srcFile)) {
-        fs.copyFileSync(srcFile, destFile);
-        console.log('✓ PDF worker script copied to static/ successfully');
-    } else {
-        console.error(`Error: PDF worker script not found at ${srcFile}`);
-        process.exit(1);
-    }
+	if (fs.existsSync(srcFile)) {
+		fs.copyFileSync(srcFile, destFile);
+		console.log('✓ PDF worker script copied to static/ successfully');
+	} else {
+		console.error(`Error: PDF worker script not found at ${srcFile}`);
+		process.exit(1);
+	}
 } catch (err) {
-    console.error('Error copying PDF worker script:', err);
-    process.exit(1);
+	console.error('Error copying PDF worker script:', err);
+	process.exit(1);
 }
