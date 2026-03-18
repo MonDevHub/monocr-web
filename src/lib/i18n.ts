@@ -1,4 +1,5 @@
 import * as runtime from '$lib/paraglide/runtime.js';
+import * as m from '$lib/paraglide/messages.js';
 import { writable } from 'svelte/store';
 import { logger } from '$lib/logger';
 import { browser } from '$app/environment';
@@ -6,6 +7,8 @@ import { browser } from '$app/environment';
 // Map runtime exports to consistent names
 export const sourceLanguageTag = runtime.baseLocale;
 export const availableLanguageTags = runtime.locales;
+
+export { m };
 
 export type AvailableLanguageTag = (typeof runtime.locales)[number];
 export type Locale = AvailableLanguageTag;
@@ -21,9 +24,15 @@ export const initLanguage = () => {
 	if (!browser) return;
 
 	try {
-		// Paraglide's runtime usually handles initial detection if configured,
-		// but we sync our store to it.
-		// If runtime.getLocale is available:
+		// 1. Try localStorage
+		const saved = localStorage.getItem('PARAGLIDE_LOCALE') as AvailableLanguageTag;
+		if (saved && availableLanguageTags.includes(saved)) {
+			runtime.setLocale(saved);
+			currentLang.set(saved);
+			return;
+		}
+
+		// 2. Try browser detection or Paraglide default
 		const detected = runtime.getLocale() as AvailableLanguageTag;
 		if (availableLanguageTags.includes(detected)) {
 			currentLang.set(detected);
@@ -46,15 +55,14 @@ export const switchLanguage = async (lang: string) => {
 		const newLang = lang as AvailableLanguageTag;
 
 		// Update runtime
-		// runtime.setLocale might be async or sync depending on config, but usually sync/async agnostic
-		// generated runtime says: export let setLocale = (newLocale, options) => { ... }
 		await runtime.setLocale(newLang);
 
 		// Update store
 		currentLang.set(newLang);
 
-		// Dispatch event for legacy listeners if any
+		// Persist
 		if (browser) {
+			localStorage.setItem('PARAGLIDE_LOCALE', newLang);
 			window.dispatchEvent(new CustomEvent('languagechange', { detail: { lang: newLang } }));
 		}
 	} catch (error) {

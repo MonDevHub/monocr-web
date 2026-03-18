@@ -44,9 +44,9 @@
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <label
-	class="border-border bg-canvas group relative flex min-h-[44px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-12 text-center transition-all duration-300 ease-in-out
+	class="border-border bg-canvas group relative flex min-h-[44px] cursor-pointer flex-col items-center justify-center rounded-[var(--radius-huge)] border-2 border-dashed p-12 text-center transition-all duration-300 ease-in-out
            {isDragging
-		? 'scale-[1.02] border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
+		? 'scale-[1.01] border-zinc-400 bg-zinc-50 dark:border-zinc-500 dark:bg-zinc-800/20'
 		: 'hover:bg-canvas-subtle hover:border-fg-secondary'}"
 	on:dragover={handleDragOver}
 	on:dragleave={handleDragLeave}
@@ -64,7 +64,7 @@
 
 	<div class="pointer-events-none flex flex-col items-center gap-4">
 		<div
-			class="bg-canvas-subtle text-fg-secondary group-hover:text-fg-primary rounded-full p-4 transition-transform duration-300 group-hover:scale-110"
+			class="bg-canvas-subtle text-fg-secondary group-hover:text-fg-primary rounded-[var(--radius-md)] p-4 transition-transform duration-300 group-hover:scale-110"
 		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -89,7 +89,7 @@
 
 	{#if isDragging}
 		<div
-			class="pointer-events-none absolute inset-0 rounded-xl bg-blue-500/10 dark:bg-blue-400/10"
+			class="pointer-events-none absolute inset-0 rounded-[var(--radius-huge)] bg-zinc-500/5 dark:bg-zinc-400/5"
 			transition:fade
 		></div>
 	{/if}

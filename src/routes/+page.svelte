@@ -1,23 +1,50 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { onMount, onDestroy } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
-	import Dropzone from '$lib/components/Dropzone.svelte';
 	import { initializeEngine, recognize, cleanup } from '$lib/monocr';
 	import { CONFIG } from '$lib/config';
 	import { renderPdfPage, loadPdf } from '$lib/utils/pdf-util';
+	import { feedbackStore } from '$lib/stores/feedback';
+	import { goto } from '$app/navigation';
 
-	let engineReady = false;
-	let loading = false;
-	let error: string | null = null;
+	let engineReady = $state(false);
+	let loading = $state(false);
+	let error = $state<string | null>(null);
 
-	let file: File | null = null;
-	let previewUrl: string | null = null;
-	let resultText: string | null = null;
-	let processingTime = 0;
-	let copied = false;
-	let isPdf = false;
-	let processingProgress = '';
-	let totalPages = 0;
+	let file = $state<File | null>(null);
+	let previewUrl = $state<string | null>(null);
+	let resultText = $state<string | null>(null);
+	let processingTime = $state(0);
+	let copied = $state(false);
+	let isPdf = $state(false);
+	let processingProgress = $state('');
+	let totalPages = $state(0);
+	let fileInput = $state<HTMLInputElement>();
+
+	function handleDragOver(e: DragEvent) {
+		e.preventDefault();
+		// Drag feedback removed for minimalist simplicity
+	}
+
+	function handleDragLeave() {
+		// Drag feedback removed for minimalist simplicity
+	}
+
+	function handleDrop(e: DragEvent) {
+		e.preventDefault();
+		const droppedFile = e.dataTransfer?.files[0];
+		if (droppedFile) {
+			handleFile({ detail: droppedFile } as CustomEvent<File>);
+		}
+	}
+
+	function handleFileSelect(e: Event) {
+		const selectedFile = (e.target as HTMLInputElement).files?.[0];
+		if (selectedFile) {
+			handleFile({ detail: selectedFile } as CustomEvent<File>);
+		}
+	}
 
 	onMount(async () => {
 		try {
@@ -82,27 +109,27 @@
 			loading = true;
 			resultText = '';
 			const buffer = await file.arrayBuffer();
-			
+
 			// Load the PDF once to avoid detaching the buffer multiple times
 			const pdf = await loadPdf(buffer);
 			totalPages = pdf.numPages;
-			
+
 			const allTexts: string[] = [];
 			const startTime = performance.now();
-			
+
 			for (let i = 1; i <= totalPages; i++) {
 				processingProgress = `Processing page ${i} of ${totalPages}...`;
-				
+
 				// 1. Render page using the loaded pdf proxy
 				const { imageBytes } = await renderPdfPage(pdf, i);
-				
+
 				// 2. Set preview for first page only
 				if (i === 1) {
 					if (previewUrl) URL.revokeObjectURL(previewUrl);
 					const blob = new Blob([imageBytes.buffer as ArrayBuffer], { type: 'image/jpeg' });
 					previewUrl = URL.createObjectURL(blob);
 				}
-				
+
 				// 3. Run OCR
 				const text = await recognize(imageBytes);
 				if (text.trim()) {
@@ -181,56 +208,100 @@
 		document.body.removeChild(link);
 		URL.revokeObjectURL(url);
 	}
+
+	async function reportError() {
+		feedbackStore.set({
+			text: resultText || '',
+			previewUrl
+		});
+		await goto('/report');
+	}
 </script>
 
-<div class="w-full">
+<div class="mx-auto w-full max-w-3xl">
 	<!-- Header -->
-	<!-- Header -->
-	<header class="mb-12 space-y-6 text-center">
-		<p class="text-fg-primary mx-auto mt-12 max-w-2xl text-lg leading-relaxed font-normal">
-			Mon OCR that runs entirely in your browser — fast, private, and built to help bring Mon texts
-			into the digital world.
+	<header class="mb-8 space-y-4 text-center">
+		<p
+			class="text-fg-primary mx-auto mt-4 max-w-2xl text-[20px] leading-tight font-medium tracking-tight"
+		>
+			Private Mon OCR. Optimized for high-accuracy archival digitization, running entirely in your
+			browser.
 		</p>
-		<p class="text-fg-secondary mx-auto max-w-lg text-xs">
-			<span class="font-semibold">Requirements:</span> Modern browser with Hardware Acceleration
-			(GPU) and 4GB+ RAM.
-			<br />
-			The model (26.3MB) is downloaded once and runs <strong>entirely offline</strong>.
+		<p class="text-fg-muted mx-auto max-w-lg text-[12px] font-medium tracking-wide">
+			Requires Hardware Acceleration (GPU) and 4GB+ RAM. Model (26.3MB) is cached locally for
+			offline use.
 		</p>
 
-		{#if !engineReady && !error}
-			<div
-				class="inline-flex animate-pulse items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-			>
-				>
+		<div class="flex justify-center pt-2">
+			{#if !engineReady && !error}
 				<div
-					class="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent"
-				></div>
-				Downloading Model from Hugging Face... (Please wait)
-			</div>
-		{:else if error}
-			<div
-				class="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-medium text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300"
-			>
-				<div class="h-1.5 w-1.5 rounded-full bg-current"></div>
-				{error}
-			</div>
-		{:else}
-			<div
-				class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
-				in:fade
-			>
-				<div class="h-1.5 w-1.5 rounded-full bg-current"></div>
-				Engine Ready (Cached for offline use)
-			</div>
-		{/if}
+					class="border-border bg-canvas-subtle text-fg-muted inline-flex items-center gap-2 rounded-md border px-3 py-1 text-[11px] font-semibold tracking-wider uppercase"
+				>
+					<div class="bg-fg-muted h-1 w-1 animate-pulse rounded-full"></div>
+					Initializing OCR Engine...
+				</div>
+			{:else if error}
+				<div
+					class="inline-flex items-center gap-2 rounded-md border border-red-100 bg-red-50/30 px-3 py-1 text-[11px] font-semibold tracking-wider text-red-600/80 uppercase dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400"
+				>
+					<div class="h-1 w-1 rounded-full bg-current"></div>
+					{error}
+				</div>
+			{:else}
+				<div
+					class="border-border bg-canvas-subtle text-fg-muted inline-flex items-center gap-1.5 rounded-md border px-3 py-1 text-[11px] font-semibold tracking-wider uppercase"
+					in:fade
+				>
+					<div class="h-1 w-1 rounded-full bg-emerald-500/60 dark:bg-emerald-500/40"></div>
+					Engine Ready
+				</div>
+			{/if}
+		</div>
 	</header>
 
 	<!-- Main Content -->
 	<main id="main-content" class="space-y-8">
 		{#if !file}
 			<div in:fade={{ duration: 300 }}>
-				<Dropzone on:file={handleFile} />
+				<div
+					class="hover:bg-canvas-subtle group border-border relative flex flex-col items-center justify-center rounded-[var(--radius-huge)] border py-12 transition-all duration-250"
+					ondragover={handleDragOver}
+					ondragleave={handleDragLeave}
+					ondrop={handleDrop}
+					onclick={() => fileInput?.click()}
+					role="button"
+					tabindex="0"
+					onkeydown={(e) => e.key === 'Enter' && fileInput?.click()}
+				>
+					<input
+						type="file"
+						bind:this={fileInput}
+						onchange={handleFileSelect}
+						accept="image/*,application/pdf"
+						class="hidden"
+					/>
+
+					<div class="flex flex-col items-center space-y-12 text-center">
+						<div
+							class="bg-primary/5 group-hover:bg-primary/10 flex h-14 w-14 items-center justify-center rounded-full transition-all duration-500"
+						>
+							<span
+								class="material-symbols-outlined text-primary text-2xl font-light transition-transform duration-500 group-hover:scale-110"
+							>
+								upload
+							</span>
+						</div>
+
+						<div class="space-y-4">
+							<h3 class="text-fg-primary text-base font-semibold tracking-tight">
+								Drop an image or PDF to begin
+							</h3>
+							<p class="text-fg-muted text-[13px] font-medium tracking-wide">
+								Your data never leaves your device
+							</p>
+						</div>
+					</div>
+				</div>
 			</div>
 		{:else}
 			<div class="mx-auto flex w-full max-w-2xl flex-col gap-6" in:fly={{ y: 20, duration: 400 }}>
@@ -242,24 +313,10 @@
 						<img src={previewUrl} alt="Preview" class="h-auto max-h-[30vh] w-full object-contain" />
 					</div>
 					<button
-						on:click={reset}
-						class="text-fg-secondary hover:text-fg-primary hover:bg-canvas-subtle border-border flex min-h-[44px] items-center gap-2 rounded-lg border bg-canvas px-4 py-2 text-sm font-medium transition-all"
+						onclick={reset}
+						class="text-fg-secondary hover:text-fg-primary hover:bg-canvas-subtle border-border bg-canvas flex min-h-[36px] items-center gap-2 rounded-lg border px-3 py-1 text-[11px] font-bold tracking-wider uppercase transition-all"
 						aria-label="Process another image or PDF"
 					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="16"
-							height="16"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						>
-							<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-							<path d="M3 3v5h5" />
-						</svg>
 						Process another image/PDF
 					</button>
 				</div>
@@ -271,7 +328,7 @@
 					<div
 						class="border-border bg-canvas-subtle flex items-center justify-between border-b px-5 py-3"
 					>
-						<h2 class="text-fg-primary text-sm font-semibold">Extracted Text</h2>
+						<h2 class="section-label mb-0">Extracted Text</h2>
 						{#if processingTime > 0 && !loading && resultText}
 							<div class="text-fg-secondary flex items-center gap-3 font-mono text-xs">
 								<span
@@ -328,75 +385,42 @@
 					</div>
 
 					{#if resultText}
-						<div class="border-border bg-canvas-subtle flex justify-end gap-2 border-t px-4 py-3">
-							<button
-								class="text-fg-secondary hover:text-fg-primary dark:text-fg-secondary dark:hover:text-fg-primary flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-								on:click={downloadText}
-								title="Save as text file"
-								aria-label="Save extracted text as a file"
-							>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="18"
-									height="18"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-linecap="round"
-									stroke-linejoin="round"
+						<div
+							class="border-border bg-canvas-subtle flex items-center justify-between border-t px-8 py-3"
+						>
+							<div class="flex items-center gap-4">
+								<button
+									class="btn-secondary px-4 py-1"
+									onclick={downloadText}
+									aria-label="Save extracted text as a file"
 								>
-									<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-									<polyline points="7 10 12 15 17 10" />
-									<line x1="12" x2="12" y1="15" y2="3" />
-								</svg>
-							</button>
-							<button
-								class="text-fg-secondary hover:text-fg-primary dark:text-fg-secondary dark:hover:text-fg-primary flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-								on:click={() => {
-									navigator.clipboard.writeText(resultText || '');
-									copied = true;
-									setTimeout(() => (copied = false), 2000);
-								}}
-								title="Copy to clipboard"
-								aria-label="Copy extracted text to clipboard"
-							>
-								{#if copied}
+									Download
+								</button>
+								<button
+									class="btn-secondary px-4 py-1"
+									onclick={() => {
+										navigator.clipboard.writeText(resultText || '');
+										copied = true;
+										setTimeout(() => (copied = false), 2000);
+									}}
+									aria-label="Copy extracted text to clipboard"
+								>
+									{copied ? 'Copied' : 'Copy'}
+								</button>
+							</div>
+							<div class="flex items-center">
+								<button
+									class="text-fg-secondary hover:text-primary group flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase transition-all"
+									onclick={reportError}
+									aria-label="Report Error or feedback for this result"
+								>
 									<span
-										class="text-emerald-600 dark:text-emerald-400"
-										in:fly={{ y: 5, duration: 200 }}>Copied!</span
+										class="material-symbols-outlined text-[16px] opacity-40 group-hover:opacity-100"
+										>flag</span
 									>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="18"
-										height="18"
-										viewBox="0 0 24 24"
-										fill="none"
-										class="text-emerald-600 dark:text-emerald-400"
-										stroke="currentColor"
-										stroke-width="2"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-									>
-										<path d="M20 6L9 17l-5-5" />
-									</svg>
-								{:else}
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="18"
-										height="18"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-									>
-										<rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-										<path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-									</svg>
-								{/if}
-							</button>
+									<span>Report</span>
+								</button>
+							</div>
 						</div>
 					{/if}
 				</div>

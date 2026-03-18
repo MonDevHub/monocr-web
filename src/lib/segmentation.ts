@@ -10,16 +10,15 @@
  */
 
 export interface LineSegment {
+	x: number;
 	y: number;
+	width: number;
 	height: number;
-	// Bounding box relative to image
 }
 
 export function segmentLines(
 	imageData: ImageData,
-	// minLineHeight unused in this robust algo, kept for API compat if needed but removing to fix lint
-
-	smoothKernel: number = 5
+	smoothKernel: number = 3 // Default changed to 3 to match Android/Python
 ): LineSegment[] {
 	const { width, height, data } = imageData;
 	const grayData = new Uint8Array(width * height);
@@ -30,29 +29,24 @@ export function segmentLines(
 		const r = data[offset];
 		const g = data[offset + 1];
 		const b = data[offset + 2];
-		// Standard luma conversion
+		// Standard luma: 0.299R + 0.587G + 0.114B
 		grayData[i] = 0.299 * r + 0.587 * g + 0.114 * b;
 	}
 
-	// 2. Adaptive Thresholding (Integral Image approach for speed)
-	// We want binary: 1 for text (dark), 0 for background (light)
-	// Simple block mean thresholding
+	// 2. Adaptive Binarization (Integral Image)
 	const binaryData = new Uint8Array(width * height);
 	const windowSize = 25;
-	const C = 10;
-
-	// Integral Image for fast local mean
+	const C = 8; // Lowered from 10 to capture faint low-contrast ink and thin strokes
 	const integral = new Uint32Array(width * height);
 
-	// Compute Integral Image
 	for (let y = 0; y < height; y++) {
-		let sum = 0;
+		let rowSum = 0;
 		for (let x = 0; x < width; x++) {
-			sum += grayData[y * width + x];
+			rowSum += grayData[y * width + x];
 			if (y === 0) {
-				integral[y * width + x] = sum;
+				integral[y * width + x] = rowSum;
 			} else {
-				integral[y * width + x] = integral[(y - 1) * width + x] + sum;
+				integral[y * width + x] = integral[(y - 1) * width + x] + rowSum;
 			}
 		}
 	}
@@ -66,7 +60,6 @@ export function segmentLines(
 	}
 
 	const halfWin = Math.floor(windowSize / 2);
-
 	for (let y = 0; y < height; y++) {
 		for (let x = 0; x < width; x++) {
 			const x1 = Math.max(0, x - halfWin);
@@ -75,90 +68,172 @@ export function segmentLines(
 			const y2 = Math.min(height - 1, y + halfWin);
 
 			const count = (x2 - x1 + 1) * (y2 - y1 + 1);
-			const sum = getSum(x1, y1, x2, y2);
-			const mean = sum / count;
-
-			// If pixel is darker than local mean - C, it is text
-			// Text is black (low value), background white (high value)
-			if (grayData[y * width + x] < mean - C) {
-				binaryData[y * width + x] = 1;
-			} else {
-				binaryData[y * width + x] = 0;
-			}
+			const mean = getSum(x1, y1, x2, y2) / count;
+			binaryData[y * width + x] = grayData[y * width + x] < mean - C ? 1 : 0;
 		}
 	}
 
-	// 3. Horizontal Projection Profile
-	const rawHist = new Float32Array(height);
+	// 3. Morphological Filtering (2D Smearing / Dilation)
+	// Separable passes for performance: O(N*Kx + N*Ky) instead of O(N*Kx*Ky)
+	// Pass A: Horizontal Smear
+	const smearedH = new Uint8Array(width * height);
+	const smearKernelX = 11;
+	const halfSmearX = Math.floor(smearKernelX / 2);
+
 	for (let y = 0; y < height; y++) {
-		let sum = 0;
 		for (let x = 0; x < width; x++) {
-			sum += binaryData[y * width + x];
-		}
-		rawHist[y] = sum;
-	}
-
-	// 4. Smooth Histogram (Box filter)
-	const hist = new Float32Array(height);
-	if (smoothKernel > 1) {
-		const halfK = Math.floor(smoothKernel / 2);
-		for (let y = 0; y < height; y++) {
-			let sum = 0;
-			let count = 0;
-			for (let k = -halfK; k <= halfK; k++) {
-				const ky = y + k;
-				if (ky >= 0 && ky < height) {
-					sum += rawHist[ky];
-					count++;
+			let found = 0;
+			const start = Math.max(0, x - halfSmearX);
+			const end = Math.min(width - 1, x + halfSmearX);
+			for (let kx = start; kx <= end; kx++) {
+				if (binaryData[y * width + kx] === 1) {
+					found = 1;
+					break;
 				}
 			}
-			hist[y] = sum / count;
+			smearedH[y * width + x] = found;
 		}
-	} else {
-		hist.set(rawHist);
 	}
 
-	// 5. Find Valleys
-	// Max density
-	let maxVal = 0;
-	for (let i = 0; i < height; i++) {
-		if (hist[i] > maxVal) maxVal = hist[i];
+	// Pass B: Vertical Smear (tethering floating marks)
+	const smearedData = new Uint8Array(width * height);
+	const smearKernelY = 5;
+	const halfSmearY = Math.floor(smearKernelY / 2);
+
+	for (let y = 0; y < height; y++) {
+		for (let x = 0; x < width; x++) {
+			let found = 0;
+			const start = Math.max(0, y - halfSmearY);
+			const end = Math.min(height - 1, y + halfSmearY);
+			for (let ky = start; ky <= end; ky++) {
+				if (smearedH[ky * width + x] === 1) {
+					found = 1;
+					break;
+				}
+			}
+			smearedData[y * width + x] = found;
+		}
 	}
 
-	const threshold = maxVal * 0.02; // 2% threshold ratio
+	// 4. Horizontal Projection Profile (using Smeared Data)
+	const rawHist = new Float32Array(height);
+	for (let y = 0; y < height; y++) {
+		let count = 0;
+		for (let x = 0; x < width; x++) {
+			if (smearedData[y * width + x]) count++;
+		}
+		rawHist[y] = count;
+	}
+
+	// 5. Smoothing (Box filter)
+	const hist = new Float32Array(height);
+	const halfK = Math.floor(smoothKernel / 2);
+	for (let y = 0; y < height; y++) {
+		let sum = 0;
+		let count = 0;
+		for (let k = -halfK; k <= halfK; k++) {
+			const ky = y + k;
+			if (ky >= 0 && ky < height) {
+				sum += rawHist[ky];
+				count++;
+			}
+		}
+		hist[y] = sum / count;
+	}
+
+	// 6. Valley Detection with Dynamic Thresholding
+	const nonZeroHist = Array.from(hist).filter((v) => v > 0);
+	const meanDensity =
+		nonZeroHist.length > 0 ? nonZeroHist.reduce((a, b) => a + b, 0) / nonZeroHist.length : 0;
+	// Use extreme low threshold (3%) to ensure faint diacritics spanning valleys don't get cut
+	const threshold = meanDensity * 0.03;
+	const MIN_LINE_HEIGHT = 10;
 
 	const segments: LineSegment[] = [];
 	let startY: number | null = null;
 
 	for (let y = 0; y < height; y++) {
 		const isText = hist[y] > threshold;
-
 		if (isText && startY === null) {
 			startY = y;
 		} else if (!isText && startY !== null) {
 			const endY = y;
-
-			if (endY - startY > 8) {
-				// Generous Padding
-				const pad = 4;
-				const y1 = Math.max(0, startY - pad);
-				const y2 = Math.min(height, endY + pad);
-
-				segments.push({ y: y1, height: y2 - y1 });
+			if (endY - startY >= MIN_LINE_HEIGHT) {
+				addSegment(startY, endY);
 			}
 			startY = null;
 		}
 	}
 
-	// Last segment
-	if (startY !== null) {
-		if (height - startY > 8) {
-			const pad = 4;
-			const y1 = Math.max(0, startY - pad);
-			const y2 = Math.min(height, height);
-			segments.push({ y: y1, height: y2 - y1 });
+	if (startY !== null && height - startY >= MIN_LINE_HEIGHT) {
+		addSegment(startY, height);
+	}
+
+	function addSegment(sY: number, eY: number) {
+		// Vertical projection within this horizontal strip to find x boundaries
+		// WE USE THE SMEARED DATA HERE to ensure wide diacritics are enveloped
+		let minX = width;
+		let maxX = 0;
+		let found = false;
+
+		for (let y = sY; y < eY; y++) {
+			for (let x = 0; x < width; x++) {
+				if (smearedData[y * width + x]) {
+					if (x < minX) minX = x;
+					if (x > maxX) maxX = x;
+					found = true;
+				}
+			}
+		}
+
+		if (found) {
+			const coreH = eY - sY;
+			// Myanmar/Mon Specific Padding Rules:
+			// Add 20% vertical padding above and below glyph clusters.
+			// Add 15% horizontal padding (using cluster height to bound massive widths).
+			const padY = Math.ceil(coreH * 0.2);
+			const padX = Math.ceil(coreH * 0.15);
+
+			const x1 = Math.max(0, minX - padX);
+			const x2 = Math.min(width, maxX + padX);
+			const y1 = Math.max(0, sY - padY);
+			const y2 = Math.min(height, eY + padY);
+
+			segments.push({
+				x: x1,
+				y: y1,
+				width: x2 - x1,
+				height: y2 - y1
+			});
 		}
 	}
 
-	return segments;
+	// 7. Post-processing: Outlier Rejection (Logos/Graphics/Noise)
+	// Find median height of "obvious" text lines (width >= 2.0x height)
+	const clearText = segments.filter((s) => s.width / s.height >= 2.0);
+	let medianH = 0;
+	if (clearText.length > 0) {
+		const heights = clearText.map((s) => s.height).sort((a, b) => a - b);
+		medianH = heights[Math.floor(heights.length / 2)];
+	}
+
+	const finalSegments = segments.filter((seg) => {
+		const ratio = seg.width / seg.height;
+
+		// Drop vertical lines / margin noise
+		if (ratio < 0.2) return false;
+
+		// Drop tiny noise specks
+		if (seg.width < 10 || seg.height < 10) return false;
+
+		// Reject logos/images:
+		// If it's squarish (not a distinct wide line) AND much taller than normal text
+		if (medianH > 0 && ratio < 2.5 && seg.height > medianH * 2.5) {
+			return false;
+		}
+
+		return true;
+	});
+
+	return finalSegments;
 }

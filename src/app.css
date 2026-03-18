@@ -3,164 +3,125 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
-/* Import custom animations - commented out as file might be missing */
-/* @import './lib/styles/animations.css'; */
-
-/* Configure dark mode to use class strategy */
+/* Configure dark mode */
 @variant dark (&:is(.dark *));
 
 @layer base {
 	/* ☀️ LIGHT MODE - Professional Paper */
 	:root {
-		/* Backgrounds - Warm & Clean */
-		--bg-canvas: #ffffff;
-		--bg-canvas-subtle: #fafafa;
-		--bg-border: #e4e4e7; /* Zinc 200 */
+		/* Spacing Scale (4/8px rhythm) - Consistent Engineering Reality */
+		--space-1: 0.25rem; /* 4px */
+		--space-2: 0.5rem; /* 8px */
+		--space-3: 0.75rem; /* 12px */
+		--space-4: 1rem; /* 16px */
+		--space-6: 1.5rem; /* 24px */
+		--space-8: 2rem; /* 32px */
+		--space-12: 3rem; /* 48px */
+		--space-16: 4rem; /* 64px */
 
-		/* Text - Softened Contrast */
-		--fg-primary: #18181b; /* Zinc 900 */
-		--fg-secondary: #52525b; /* Zinc 600 */
-		--fg-accent: #27272a; /* Zinc 800 */
+		/* Backgrounds - Calm Paper-like */
+		--bg-canvas: #fcfbf9;
+		--bg-canvas-subtle: #f5f4f0;
+		--bg-border: #e8e6e1;
+
+		/* Professional Documentation Palette - Unified Garnet (Muted) */
+		--primary: #7a1b1b;
+		--accent-gold: #d4af37;
+		--background-light: #fcfbfb;
+		--background-dark: #1a1513;
+
+		/* Text Hierarchy - Softered for Eye Comfort */
+		--fg-primary: #2a2a2b; /* Soft Deep Gray */
+		--fg-secondary: #5c5c5e; /* Muted Zinc */
+		--fg-muted: #8a8a8c; /* Zinc 500 equivalent */
+		--fg-accent: #3a3a3c; /* Zinc 900 equivalent */
 
 		/* Buttons/Interactive */
-		--btn-bg: #f4f4f5; /* Zinc 100 */
-		--btn-border: #e4e4e7;
-		--btn-hover: #e4e4e7;
+		--btn-bg: #f5f4f0;
+		--btn-border: #e8e6e1;
+		--btn-hover: #e8e6e1;
 
 		/* Text on Primary Background */
 		--fg-on-primary: #ffffff;
 	}
 
-	/* 🌑 DARK MODE - Deep Slate */
+	/* 🌑 DARK MODE - Dim Studio */
 	.dark {
-		/* Backgrounds */
-		--bg-canvas: #09090b; /* Zinc 950 */
-		--bg-canvas-subtle: #18181b; /* Zinc 900 */
-		--bg-border: #27272a; /* Zinc 800 */
-
-		/* Text */
-		--fg-primary: #e4e4e7; /* Zinc 200 */
-		--fg-secondary: #d4d4d8; /* Zinc 300 - Brighter for visibility */
-		--fg-accent: #f4f4f5; /* Zinc 100 */
-
-		/* Buttons/Interactive */
-		--btn-bg: #18181b;
-		--btn-border: #27272a;
-		--btn-hover: #27272a;
-
-		/* Text on Primary Background */
-		--fg-on-primary: #09090b;
+		--bg-canvas: #151517;
+		--bg-canvas-subtle: #1c1c1e;
+		--bg-border: #2c2c2e;
+		--fg-primary: #d1d1d6;
+		--fg-secondary: #8e8e93;
+		--fg-muted: #8e8e93; /* Bumped from #636366 for readability */
+		--fg-accent: #f4f4f5;
+		--btn-bg: #1c1c1e;
+		--btn-border: #2c2c2e;
+		--btn-hover: #3a3a3c;
+		--fg-on-primary: #ffffff;
+		/* Refine primary in dark: Garnet but slightly brighter for legibility */
+		--primary-action: #a62d2d;
 	}
 }
 
 @theme {
-	/* GitHub theme variables mapped to Tailwind utilities */
 	--color-canvas: var(--bg-canvas);
 	--color-canvas-subtle: var(--bg-canvas-subtle);
 	--color-border: var(--bg-border);
 	--color-fg-primary: var(--fg-primary);
 	--color-fg-secondary: var(--fg-secondary);
+	--color-fg-muted: var(--fg-muted);
 	--color-fg-accent: var(--fg-accent);
 	--color-btn-bg: var(--btn-bg);
 	--color-btn-border: var(--btn-border);
 	--color-btn-hover: var(--btn-hover);
+	--color-fg-on-primary: var(--fg-on-primary);
+	--color-primary-action: var(--primary-action, var(--primary));
 
-	/* Map GitHub theme to Tailwind utilities for backward compatibility */
-	--color-primary: var(--fg-accent);
-	--color-background-light: var(--bg-canvas);
-	--color-card-light: var(--bg-canvas-subtle);
-	--color-text-light: var(--fg-primary);
-	--color-text-secondary-light: var(--fg-secondary);
-	--color-border-light: var(--bg-border);
+	--color-primary: var(--primary);
+	--color-accent-gold: var(--accent-gold);
 
-	/* Dark mode colors */
-	--color-background-dark: var(--bg-canvas);
-	--color-card-dark: var(--bg-canvas-subtle);
-	--color-text-dark: var(--fg-primary);
-	--color-text-secondary-dark: var(--fg-secondary);
-	--color-border-dark: var(--bg-border);
-	--color-primary-dark: var(--fg-accent);
+	--font-display: 'Inter', system-ui, sans-serif;
+	--font-public-sans: 'Public Sans', system-ui, sans-serif;
 
-	/* Fonts */
-	--font-display: 'Inter', sans-serif;
-
-	/* Map to Tailwind utilities - background */
-	--color-background: var(--bg-canvas);
-	--color-foreground: var(--fg-primary);
-
-	/* Map card colors */
-	--color-card: var(--bg-canvas-subtle);
-	--color-card-foreground: var(--fg-primary);
-
-	/* Map border colors */
-	--color-border: var(--bg-border);
-
-	/* Map text colors */
-	--color-muted-foreground: var(--fg-secondary);
-
-	/* Map input colors */
-	--color-input: var(--bg-border);
-
-	/* Map ring/primary */
-	--color-ring: var(--fg-accent);
-}
-
-/* Dark mode overrides for Tailwind compatibility */
-.dark {
 	--color-background: var(--bg-canvas);
 	--color-foreground: var(--fg-primary);
 	--color-card: var(--bg-canvas-subtle);
 	--color-card-foreground: var(--fg-primary);
-	--color-border: var(--bg-border);
 	--color-muted-foreground: var(--fg-secondary);
 	--color-input: var(--bg-border);
-	--color-ring: var(--fg-accent);
+	--color-ring: var(--primary);
+
+	/* Radius standardization - Subtle & Professional */
+	--radius-sm: 2px;
+	--radius-md: 2px; /* Reduced from 4px */
+	--radius-lg: 4px; /* Reduced from 8px - Primary component radius */
+	--radius-xl: 6px;
+	--radius-2xl: 8px;
+	--radius-huge: 8px; /* Reduced from 16px - Card/Dropzone radius */
+
+	/* Transition tokens */
+	--transition-fast: 150ms;
+	--transition-base: 250ms;
 }
 
-/* Custom GitHub theme utility classes */
 @layer utilities {
-	.bg-canvas {
-		background-color: var(--bg-canvas);
+	.btn-primary {
+		@apply bg-primary-action text-fg-on-primary inline-flex items-center justify-center rounded-[var(--radius-lg)] px-6 py-2 text-[11px] font-semibold tracking-[0.05em] uppercase transition-all duration-250 ease-in-out hover:brightness-110 active:scale-[0.95];
 	}
-	.bg-canvas-subtle {
-		background-color: var(--bg-canvas-subtle);
-	}
-	.bg-border {
-		background-color: var(--bg-border);
-	}
-	.text-fg-primary {
-		color: var(--fg-primary);
-	}
-	.text-fg-secondary {
-		color: var(--fg-secondary);
-	}
-	.text-fg-accent {
-		color: var(--fg-accent);
-	}
-	.border-border {
-		border-color: var(--bg-border);
-	}
-	.bg-btn {
-		background-color: var(--btn-bg);
-	}
-	.border-btn {
-		border-color: var(--btn-border);
-	}
-	.hover\:bg-btn-hover:hover {
-		background-color: var(--btn-hover);
-	}
-	.text-on-primary {
-		color: var(--fg-on-primary);
+
+	.btn-secondary {
+		@apply border-border bg-btn-bg text-fg-secondary hover:bg-btn-hover hover:text-fg-primary inline-flex items-center justify-center rounded-[var(--radius-lg)] border px-4 py-2 text-[11px] font-semibold tracking-[0.05em] uppercase transition-all duration-250 ease-in-out active:scale-[0.95];
 	}
 }
 
-/* Base styles */
 :root {
 	font-family: var(--font-display);
 	background-color: var(--bg-canvas);
 	color: var(--fg-primary);
-	line-height: 1.6;
-	font-feature-settings: 'cv11', 'ss01';
+	line-height: 1.5; /* Compact but legible */
+	font-size: 15px; /* Unified reduction for density */
+	font-feature-settings: 'cv11', 'ss01', 'cv08';
+	-webkit-tap-highlight-color: transparent;
 }
 
 h1,
@@ -169,11 +130,11 @@ h3,
 h4,
 h5,
 h6 {
-	letter-spacing: -0.02em;
-	font-weight: 500;
+	letter-spacing: -0.015em; /* Refined for better legibility */
+	font-weight: 500; /* Maintain semibold-like feel but with Inter's precision */
+	color: var(--fg-primary);
 }
 
-/* Smooth scrolling for anchor links */
 html {
 	scroll-behavior: smooth;
 	background-color: var(--bg-canvas);
@@ -183,7 +144,6 @@ html {
 		color 0.3s;
 }
 
-/* Smooth transitions */
 body {
 	background-color: var(--bg-canvas);
 	color: var(--fg-primary);
@@ -196,39 +156,66 @@ body {
 	-moz-osx-font-smoothing: grayscale;
 }
 
-/* Dark mode html and body */
-html.dark {
-	background-color: var(--bg-canvas);
-	color: var(--fg-primary);
-}
-
-html.dark body {
-	background-color: var(--bg-canvas);
-	color: var(--fg-primary);
-}
-
-/* Premium Selection Style */
 ::selection {
-	background-color: var(--fg-accent);
+	background-color: var(--primary);
 	color: #ffffff;
 }
 
-/* Global interactive cursor */
+.tap-highlight-none {
+	-webkit-tap-highlight-color: transparent;
+}
+
+.section-label {
+	@apply mb-4 block text-[9px] font-bold tracking-[0.3em] text-slate-400 uppercase dark:text-slate-400;
+}
+
+* {
+	transition-property: background-color, border-color, color, opacity;
+	transition-duration: 200ms;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 button,
 a,
 [role='button'],
-input[type='submit'],
-input[type='reset'],
-input[type='button'],
 label {
 	cursor: pointer;
+	touch-action: manipulation; /* Prevent 300ms delay and accidental zoom on Safari */
 }
 
-/* iOS Safari Mobile Zoom Fix: Ensure inputs are at least 16px to prevent auto-zoom */
 @media screen and (max-width: 768px) {
 	input,
 	textarea,
 	select {
 		font-size: 16px !important;
 	}
+}
+
+/* Custom Slim Scrollbar - Universal for all elements */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: color-mix(in srgb, var(--primary) 50%, transparent) transparent;
+}
+
+/* Chrome, Edge, Safari */
+*::-webkit-scrollbar {
+	width: 1px !important;
+	height: 1px !important;
+}
+
+*::-webkit-scrollbar-track {
+	background: transparent !important;
+}
+
+*::-webkit-scrollbar-thumb {
+	background: linear-gradient(
+		180deg,
+		color-mix(in srgb, var(--primary) 60%, transparent) 0%,
+		color-mix(in srgb, var(--primary) 30%, transparent) 100%
+	) !important;
+	border-radius: 10px !important;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+	background: color-mix(in srgb, var(--primary) 80%, transparent) !important;
 }
