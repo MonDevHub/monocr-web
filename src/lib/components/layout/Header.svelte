@@ -128,7 +128,8 @@
 		<!-- Desktop Nav -->
 		<nav class="ml-auto hidden items-center space-x-6 md:flex" aria-label="Main navigation">
 			<a
-				class="text-[14px] font-medium transition-all duration-200 focus:outline-none active:scale-95 {$page.url.pathname === '/'
+				class="text-[14px] font-medium transition-all duration-200 focus:outline-none active:scale-95 {$page
+					.url.pathname === '/'
 					? 'text-fg-primary'
 					: 'text-fg-secondary hover:text-fg-primary'}"
 				href="/"
@@ -136,8 +137,8 @@
 				{m.nav_home()}
 			</a>
 			<a
-				class="text-[14px] font-medium transition-all duration-200 focus:outline-none active:scale-95 {$page.url.pathname ===
-				'/docs'
+				class="text-[14px] font-medium transition-all duration-200 focus:outline-none active:scale-95 {$page
+					.url.pathname === '/docs'
 					? 'text-fg-primary'
 					: 'text-fg-secondary hover:text-fg-primary'}"
 				href="/docs"
@@ -145,8 +146,8 @@
 				{m.nav_docs()}
 			</a>
 			<a
-				class="text-[14px] font-medium transition-all duration-200 focus:outline-none active:scale-95 {$page.url.pathname ===
-				'/report'
+				class="text-[14px] font-medium transition-all duration-200 focus:outline-none active:scale-95 {$page
+					.url.pathname === '/report'
 					? 'text-fg-primary'
 					: 'text-fg-secondary hover:text-fg-primary'}"
 				href="/report"
@@ -154,8 +155,8 @@
 				{m.nav_feedback()}
 			</a>
 			<a
-				class="text-[14px] font-medium transition-all duration-200 focus:outline-none active:scale-95 {$page.url.pathname ===
-				'/contribute'
+				class="text-[14px] font-medium transition-all duration-200 focus:outline-none active:scale-95 {$page
+					.url.pathname === '/contribute'
 					? 'text-fg-primary'
 					: 'text-fg-secondary hover:text-fg-primary'}"
 				href="/contribute"

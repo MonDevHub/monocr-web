@@ -185,9 +185,13 @@ export class MonOcrOnnx {
 	/**
 	 * Process a single text line into model input tensor format.
 	 */
-	private async processLine(source: ImageBitmap, sy: number, sh: number): Promise<Float32Array> {
-		const sw = source.width;
-
+	private async processLine(
+		source: ImageBitmap,
+		sx: number,
+		sy: number,
+		sw: number,
+		sh: number
+	): Promise<Float32Array> {
 		// Calculate scaled dimensions
 		const scale = this.TARGET_HEIGHT / sh;
 		const scaledWidth = Math.min(Math.round(sw * scale), this.TARGET_WIDTH);
@@ -202,7 +206,7 @@ export class MonOcrOnnx {
 
 		// Draw cropped and scaled image
 		// drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
-		ctx.drawImage(source, 0, sy, sw, sh, 0, 0, scaledWidth, this.TARGET_HEIGHT);
+		ctx.drawImage(source, sx, sy, sw, sh, 0, 0, scaledWidth, this.TARGET_HEIGHT);
 
 		const { data } = ctx.getImageData(0, 0, this.TARGET_WIDTH, this.TARGET_HEIGHT);
 
@@ -286,7 +290,7 @@ export class MonOcrOnnx {
 
 		// Fallback: if no segments found (e.g. single large word filling bounds?), use full image
 		if (segments.length === 0) {
-			segments = [{ y: 0, height: fullBitmap.height }];
+			segments = [{ x: 0, y: 0, width: fullBitmap.width, height: fullBitmap.height }];
 		}
 
 		const results: string[] = [];
@@ -294,7 +298,7 @@ export class MonOcrOnnx {
 		// 4. Process each line
 		try {
 			for (const seg of segments) {
-				const inputData = await this.processLine(fullBitmap, seg.y, seg.height);
+				const inputData = await this.processLine(fullBitmap, seg.x, seg.y, seg.width, seg.height);
 				const inputTensor = new ort.Tensor('float32', inputData, [
 					1,
 					1,

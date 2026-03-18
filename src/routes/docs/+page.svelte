@@ -1,7 +1,6 @@
 <script lang="ts">
 	/* eslint-disable svelte/no-navigation-without-resolve */
 	import { SEO } from '$lib/components';
-	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 
 	let activeSection = $state('getting-started');
@@ -31,45 +30,52 @@
 <div class="font-public-sans text-fg-primary">
 	<div class="flex">
 		<!-- Left Sidebar Navigation -->
-		<aside
-			class="hidden w-64 shrink-0 border-r border-border px-5 py-8 lg:block"
-		>
+		<aside class="border-border hidden w-64 shrink-0 border-r px-5 py-8 lg:block">
 			<div class="sticky top-24 flex flex-col gap-8">
 				<div>
-					<h3 class="mb-4 text-[11px] font-bold tracking-[0.2em] text-fg-muted uppercase px-3">Core Concepts</h3>
+					<h3 class="text-fg-muted mb-4 px-3 text-[11px] font-bold tracking-[0.2em] uppercase">
+						Core Concepts
+					</h3>
 					<nav class="flex flex-col gap-1">
 						<a
-							class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-all hover:bg-canvas-subtle active:scale-[0.98]"
+							class="hover:bg-canvas-subtle flex items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-all active:scale-[0.98]"
 							href="#introduction"
 						>
 							<span class="material-symbols-outlined text-[18px] opacity-70">info</span> Introduction
 						</a>
 						<a
-							class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-all active:scale-[0.98] {activeSection ===
+							class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-all active:scale-[0.95] {activeSection ===
 							'getting-started'
-								? 'bg-primary/5 text-primary font-bold'
-								: 'hover:bg-canvas-subtle'}"
+								? 'bg-canvas-subtle text-fg-primary'
+								: 'text-fg-secondary hover:bg-canvas-subtle/50 hover:text-fg-primary'}"
 							href="#getting-started"
 						>
-							<span class="material-symbols-outlined text-[18px] {activeSection === 'getting-started' ? 'opacity-100' : 'opacity-70'}">rocket_launch</span> Getting Started
+							<span
+								class="material-symbols-outlined text-[18px] {activeSection === 'getting-started'
+									? 'opacity-100'
+									: 'opacity-60'}">rocket_launch</span
+							> Getting Started
 						</a>
 						<a
-							class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-all hover:bg-canvas-subtle active:scale-[0.98]"
+							class="hover:bg-canvas-subtle flex items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-all active:scale-[0.98]"
 							href="#image-quality"
 						>
-							<span class="material-symbols-outlined text-[18px] opacity-70">high_quality</span> Quality Standards
+							<span class="material-symbols-outlined text-[18px] opacity-70">high_quality</span> Quality
+							Standards
 						</a>
 						<a
-							class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-all hover:bg-canvas-subtle active:scale-[0.98]"
+							class="hover:bg-canvas-subtle flex items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-all active:scale-[0.98]"
 							href="/report"
 						>
 							<span class="material-symbols-outlined text-[18px] opacity-70">edit_note</span> Feedback
 						</a>
 						<a
-							class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-all hover:bg-canvas-subtle active:scale-[0.98]"
+							class="hover:bg-canvas-subtle flex items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-all active:scale-[0.98]"
 							href="/contribute"
 						>
-							<span class="material-symbols-outlined text-[18px] opacity-70">volunteer_activism</span> Contribute
+							<span class="material-symbols-outlined text-[18px] opacity-70"
+								>volunteer_activism</span
+							> Contribute
 						</a>
 					</nav>
 				</div>
@@ -78,13 +84,13 @@
 					<h3 class="section-label px-3">Integration</h3>
 					<nav class="flex flex-col gap-1">
 						<a
-							class="flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-canvas-subtle"
+							class="hover:bg-canvas-subtle flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
 							href="#cli"
 						>
 							<span class="material-symbols-outlined text-lg">terminal</span> CLI Reference
 						</a>
 						<a
-							class="flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-canvas-subtle"
+							class="hover:bg-canvas-subtle flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
 							href="#sdk"
 						>
 							<span class="material-symbols-outlined text-lg">code</span> Python SDK
@@ -96,7 +102,7 @@
 					<h3 class="section-label px-3">Legal & Privacy</h3>
 					<nav class="flex flex-col gap-1">
 						<a
-							class="flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-canvas-subtle {activeSection ===
+							class="hover:bg-canvas-subtle flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium transition-colors {activeSection ===
 							'privacy'
 								? 'bg-primary/10 text-primary font-bold'
 								: ''}"
@@ -105,7 +111,7 @@
 							<span class="material-symbols-outlined text-lg">shield</span> Privacy Policy
 						</a>
 						<a
-							class="flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-canvas-subtle"
+							class="hover:bg-canvas-subtle flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
 							href="#license"
 						>
 							<span class="material-symbols-outlined text-lg">gavel</span> License
@@ -121,44 +127,37 @@
 				<!-- Article Content -->
 				<div class="min-w-0 flex-1 xl:max-w-4xl">
 					<!-- Breadcrumbs -->
-					<nav class="mb-12 flex items-center gap-2 text-[10px] font-bold tracking-[0.15em] text-fg-muted uppercase">
-						<a
-							class="hover:text-primary transition-colors {$page.url.pathname === '/'
-								? 'text-primary'
-								: ''}"
-							href="/"
-						>
-							Docs
-						</a>
+					<nav class="text-fg-muted mb-8 flex items-center gap-2 text-[12px] font-medium">
+						<a class="hover:text-fg-primary transition-colors" href="/"> Docs </a>
 						<span class="opacity-30">/</span>
-						<span class="text-fg-primary font-semibold">Getting Started</span>
+						<span class="text-fg-primary">Getting Started</span>
 					</nav>
 
 					<section id="introduction" class="mb-10">
 						<h1 class="mb-3 text-2xl font-bold tracking-tight">Documentation</h1>
-						<p class="text-base leading-relaxed text-fg-muted">
+						<p class="text-fg-muted text-base leading-relaxed">
 							Academic-grade OCR engine for Mon script. High-performance, private, and localized.
 						</p>
 					</section>
 
 					<!-- Getting Started Section -->
 					<section id="getting-started" class="mb-12 scroll-mt-24">
-						<h2 class="mb-4 flex items-center gap-2 text-xl font-bold">
+						<h2 class="mb-4 flex items-center gap-3 text-xl font-bold tracking-tight">
 							<span
-								class="bg-primary/10 text-primary flex h-7 w-7 items-center justify-center rounded-lg text-sm font-bold"
+								class="bg-canvas-subtle text-fg-secondary flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold"
 								>1</span
 							>
 							Installation
 						</h2>
-						<p class="mb-4 text-fg-muted">
+						<p class="text-fg-muted mb-4">
 							Install the latest stable release of the MonOCR engine via our package manager. We
 							recommend using a virtual environment for academic consistency.
 						</p>
 						<div class="group relative">
 							<pre
-								class="overflow-x-auto rounded-xl border border-border bg-canvas-subtle p-5 font-mono text-xs text-fg-primary">pip install monocr-engine --upgrade</pre>
+								class="border-border bg-canvas-subtle text-fg-primary overflow-x-auto rounded-xl border p-5 font-mono text-xs">pip install monocr-engine --upgrade</pre>
 							<button
-								class="hover:text-primary absolute top-3 right-3 rounded-md p-2 text-fg-muted opacity-40 transition-opacity hover:bg-canvas/50 hover:opacity-100"
+								class="hover:text-primary text-fg-muted hover:bg-canvas/50 absolute top-3 right-3 rounded-md p-2 opacity-40 transition-opacity hover:opacity-100"
 								aria-label="Copy to clipboard"
 							>
 								<span class="material-symbols-outlined text-base">content_copy</span>
@@ -168,19 +167,19 @@
 
 					<!-- Quick Start Example -->
 					<section id="quick-start" class="mb-12 scroll-mt-24">
-						<h2 class="mb-4 flex items-center gap-2 text-xl font-bold">
+						<h2 class="mb-4 flex items-center gap-3 text-xl font-bold tracking-tight">
 							<span
-								class="bg-primary/10 text-primary flex h-7 w-7 items-center justify-center rounded-lg text-sm font-bold"
+								class="bg-canvas-subtle text-fg-secondary flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold"
 								>2</span
 							>
 							Quick Start Example
 						</h2>
-						<p class="mb-4 text-fg-muted">
+						<p class="text-fg-muted mb-4">
 							Initialize the processor and run text detection on a high-resolution scan.
 						</p>
 						<div class="group relative">
 							<pre
-								class="overflow-x-auto rounded-xl border border-border bg-canvas-subtle p-5 font-mono text-xs text-fg-primary">import monocr
+								class="border-border bg-canvas-subtle text-fg-primary overflow-x-auto rounded-xl border p-5 font-mono text-xs">import monocr
 
 # Initialize with academic weights
 engine = monocr.Engine(preset='academic-v2')
@@ -193,40 +192,52 @@ print(result.to_json())</pre>
 						</div>
 					</section>
 
-					<hr class="my-16 border-border" />
+					<hr class="border-border my-16" />
 
 					<section class="mb-12 scroll-mt-24" id="image-quality">
 						<h2 class="mb-4 text-2xl font-bold">Input Standards</h2>
-						<p class="mb-8 text-fg-secondary">
+						<p class="text-fg-secondary mb-8">
 							Follow these standards to achieve maximum accuracy (99.8%+).
 						</p>
 						<div class="grid gap-6 sm:grid-cols-2">
 							<!-- Resolution Card -->
-							<div class="rounded-xl border border-border bg-canvas p-6 shadow-sm transition-all hover:shadow-md">
-								<span class="material-symbols-outlined text-primary mb-4 text-3xl">photo_camera</span>
+							<div
+								class="border-border bg-canvas rounded-xl border p-6 shadow-sm transition-all hover:shadow-md"
+							>
+								<span class="material-symbols-outlined text-primary mb-4 text-3xl"
+									>photo_camera</span
+								>
 								<h3 class="mb-2 text-sm font-bold">Resolution</h3>
-								<p class="text-xs leading-relaxed text-fg-secondary">
-									Aim for a minimum of 300 DPI. For micro-text or ancient manuscripts, 600 DPI is required.
+								<p class="text-fg-secondary text-xs leading-relaxed">
+									Aim for a minimum of 300 DPI. For micro-text or ancient manuscripts, 600 DPI is
+									required.
 								</p>
 							</div>
 							<!-- Lighting Card -->
-							<div class="rounded-xl border border-border bg-canvas p-6 shadow-sm transition-all hover:shadow-md">
+							<div
+								class="border-border bg-canvas rounded-xl border p-6 shadow-sm transition-all hover:shadow-md"
+							>
 								<span class="material-symbols-outlined text-primary mb-4 text-3xl">light_mode</span>
 								<h3 class="mb-2 text-sm font-bold">Lighting</h3>
-								<p class="text-xs leading-relaxed text-fg-secondary">
-									Use diffuse lighting to minimize glares and deep shadows that can confuse the segmenter.
+								<p class="text-fg-secondary text-xs leading-relaxed">
+									Use diffuse lighting to minimize glares and deep shadows that can confuse the
+									segmenter.
 								</p>
 							</div>
 						</div>
 					</section>
 
-					<section class="bg-primary/5 border-primary/10 mb-12 scroll-mt-24 rounded-xl border p-8" id="privacy">
+					<section
+						class="bg-primary/5 border-primary/10 mb-12 scroll-mt-24 rounded-xl border p-8"
+						id="privacy"
+					>
 						<h2 class="mb-4 flex items-center gap-3 text-2xl font-bold">
 							<span class="material-symbols-outlined text-primary">security</span>
 							Privacy-First OCR
 						</h2>
-						<p class="mb-6 text-sm leading-relaxed text-fg-secondary">
-							Documents are processed entirely on your local machine. No data is uploaded to our servers.
+						<p class="text-fg-secondary mb-6 text-sm leading-relaxed">
+							Documents are processed entirely on your local machine. No data is uploaded to our
+							servers.
 						</p>
 					</section>
 
@@ -238,7 +249,7 @@ print(result.to_json())</pre>
 							<span class="material-symbols-outlined text-primary">security</span>
 							Privacy-First OCR
 						</h2>
-						<p class="mb-4 text-sm leading-relaxed text-fg-muted">
+						<p class="text-fg-muted mb-4 text-sm leading-relaxed">
 							Documents are processed entirely on your local machine. No data is uploaded to our
 							servers.
 						</p>
@@ -246,7 +257,7 @@ print(result.to_json())</pre>
 							<span class="material-symbols-outlined text-base">shield_lock</span>
 							<span>100% Local Processing • No Data Leaves Your Device</span>
 						</div>
-						<ul class="space-y-2 text-xs text-fg-muted">
+						<ul class="text-fg-muted space-y-2 text-xs">
 							<li class="flex items-center gap-2">
 								<span class="material-symbols-outlined text-primary text-[14px]">check_circle</span>
 								Localized data handling (GDPR/CCPA compliant).
@@ -261,18 +272,14 @@ print(result.to_json())</pre>
 					<!-- Technical Engine Section -->
 					<section id="technology" class="mb-24 scroll-mt-24">
 						<h3 class="section-label">Technical Engine</h3>
-						<div
-							class="rounded-xl border border-border bg-canvas-subtle p-8"
-						>
+						<div class="border-border bg-canvas-subtle rounded-xl border p-8">
 							<div class="mb-4 flex items-center gap-3">
 								<span class="material-symbols-outlined text-primary">precision_manufacturing</span>
-								<h4
-									class="text-sm font-bold tracking-wider text-fg-primary uppercase"
-								>
+								<h4 class="text-fg-primary text-sm font-bold tracking-wider uppercase">
 									Neural Architecture
 								</h4>
 							</div>
-							<p class="mb-4 text-sm leading-relaxed text-fg-muted">
+							<p class="text-fg-muted mb-4 text-sm leading-relaxed">
 								MonOCR uses a neural-network architecture (MobileNetV3 + BiLSTM) optimized for
 								archival digitization. Inference runs entirely in your browser using WebGPU/WASM for
 								speed and privacy.
@@ -284,12 +291,12 @@ print(result.to_json())</pre>
 					<section id="heritage" class="mb-24 scroll-mt-24">
 						<h3 class="section-label">Preserving Mon Heritage</h3>
 						<div class="prose prose-sm max-w-none space-y-4 dark:prose-invert">
-							<p class="leading-relaxed font-medium text-fg-muted">
+							<p class="text-fg-muted leading-relaxed font-medium">
 								Mon (mnw) is a vulnerable language with limited digital presence. Most written
 								knowledge remains locked in analog scans, making it difficult to build modern
 								digital tools.
 							</p>
-							<p class="text-xs leading-relaxed text-fg-muted/60 italic">
+							<p class="text-fg-muted/60 text-xs leading-relaxed italic">
 								Your contributions directly help digitize this history. Every document or typed
 								script improves our specialized AI model, enabling future research and linguistic
 								preservation.
@@ -299,36 +306,32 @@ print(result.to_json())</pre>
 
 					<section id="cli" class="mb-24 scroll-mt-24">
 						<h1 class="mb-3 text-2xl font-bold tracking-tight">CLI Reference</h1>
-						<p class="text-base leading-relaxed text-fg-muted">
+						<p class="text-fg-muted text-base leading-relaxed">
 							Full command-line interface documentation for terminal-based digitization workflows.
 						</p>
-						<div
-							class="mt-8 rounded-xl border border-border bg-canvas-subtle p-6"
-						>
+						<div class="border-border bg-canvas-subtle mt-8 rounded-xl border p-6">
 							<code class="text-xs">monocr --help</code>
 						</div>
 					</section>
 
 					<section id="sdk" class="mb-24 scroll-mt-24">
 						<h1 class="mb-3 text-2xl font-bold tracking-tight">Python SDK</h1>
-						<p class="text-base leading-relaxed text-fg-muted">
+						<p class="text-fg-muted text-base leading-relaxed">
 							Library features, API classes, and integration patterns for Python developers.
 						</p>
 					</section>
 
 					<section id="license" class="mb-24 scroll-mt-24">
 						<h1 class="mb-3 text-2xl font-bold tracking-tight">License</h1>
-						<p class="text-base leading-relaxed text-fg-muted">
+						<p class="text-fg-muted text-base leading-relaxed">
 							MonOCR is released under the academic open-source license.
 						</p>
 					</section>
 
 					<!-- Footer Navigation -->
-					<footer
-						class="flex items-center justify-between border-t border-border py-10"
-					>
+					<footer class="border-border flex items-center justify-between border-t py-10">
 						<div class="flex flex-col">
-							<p class="mb-1 text-xs font-bold text-fg-muted uppercase">Previous</p>
+							<p class="text-fg-muted mb-1 text-xs font-bold uppercase">Previous</p>
 							<a
 								class="text-primary group flex items-center gap-1 text-xs font-bold hover:underline"
 								href="#introduction"
@@ -340,7 +343,7 @@ print(result.to_json())</pre>
 							</a>
 						</div>
 						<div class="flex flex-col items-end">
-							<p class="mb-1 text-xs font-bold text-fg-muted uppercase">Next</p>
+							<p class="text-fg-muted mb-1 text-xs font-bold uppercase">Next</p>
 							<a
 								class="text-primary group flex items-center gap-1 text-xs font-bold hover:underline"
 								href="#cli"
@@ -358,7 +361,7 @@ print(result.to_json())</pre>
 				<aside class="hidden w-48 shrink-0 xl:block">
 					<div class="sticky top-24">
 						<h4 class="section-label">On this page</h4>
-						<nav class="flex flex-col gap-3 border-l border-border pl-4">
+						<nav class="border-border flex flex-col gap-3 border-l pl-4">
 							<a
 								class="text-xs font-medium transition-colors {activeSection === 'getting-started'
 									? 'text-primary'

@@ -12,15 +12,15 @@
 	}
 
 	const {
-		title = 'MonOCR Web - Private Mon Language OCR',
-		description = 'Fast, privacy-focused Mon language OCR running entirely in your browser using ONNX Runtime & WebAssembly.',
-		keywords = 'Mon OCR, Mon language, OCR, WebAssembly, ONNX, Privacy, mnw, text recognition',
-		image = '/og-image.png',
+		title = 'Mon OCR - Mon (mnw) Language Recognition',
+		description = 'OCR model for digitalizing Mon (mnw) language. Fast, private, and high-accuracy recognition running entirely in your browser.',
+		keywords = 'Mon, Mon (mnw), Mon OCR, MonOCR, monocr, mon ocr, mon language, ocr model, language preservation',
+		image = '/og-image.jpg',
 		type = 'website',
 		jsonLd = undefined
 	}: Props = $props();
 
-	const siteUrl = 'https://monocr-web.pages.dev';
+	const siteUrl = 'https://ocr.mondevhub.com';
 	const canonicalUrl = $derived(`${siteUrl}${$page.url.pathname}`);
 	const imageUrl = $derived(image.startsWith('http') ? image : `${siteUrl}${image}`);
 
@@ -29,18 +29,18 @@
 		'@graph': [
 			{
 				'@type': 'WebSite',
-				'@id': 'https://monocr.pages.dev/#website',
-				url: 'https://monocr.pages.dev',
-				name: 'MonOCR Web',
-				description: 'Fast, privacy-focused Mon language OCR running entirely in your browser.',
+				'@id': 'https://ocr.mondevhub.com/#website',
+				url: 'https://ocr.mondevhub.com',
+				name: 'Mon OCR',
+				description: 'OCR model for digitalizing Mon (mnw) language.',
 				publisher: {
-					'@id': 'https://monocr.pages.dev/#organization'
+					'@id': 'https://ocr.mondevhub.com/#organization'
 				},
 				inLanguage: 'mnw'
 			},
 			{
 				'@type': 'Organization',
-				'@id': 'https://monocr.pages.dev/#organization',
+				'@id': 'https://ocr.mondevhub.com/#organization',
 				name: 'MonOCR Project',
 				url: siteUrl,
 				logo: {
@@ -48,8 +48,7 @@
 					url: `${siteUrl}/favicon-512x512.png`,
 					width: 512,
 					height: 512
-				},
-				email: 'contact@example.com'
+				}
 			}
 		]
 	};
@@ -61,7 +60,7 @@
 	<title>{title}</title>
 	<meta name="description" content={description} />
 	<meta name="keywords" content={keywords} />
-	<meta name="author" content="Organization Name" />
+	<meta name="author" content="MonOCR Project" />
 	<meta
 		name="robots"
 		content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
@@ -77,7 +76,7 @@
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
 	<meta property="og:image:alt" content={title} />
-	<meta property="og:site_name" content="Site Name" />
+	<meta property="og:site_name" content="Mon OCR" />
 	<meta property="og:locale" content="en_US" />
 
 	<!-- Twitter -->

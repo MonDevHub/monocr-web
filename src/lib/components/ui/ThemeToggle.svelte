@@ -49,7 +49,7 @@
 
 <button
 	onclick={toggleTheme}
-	class="text-fg-secondary hover:text-fg-primary flex min-h-[44px] min-w-[44px] cursor-pointer touch-manipulation items-center justify-center p-2 transition-all duration-300 ease-in-out hover:scale-110 focus:outline-none active:scale-95"
+	class="text-fg-secondary hover:bg-canvas-subtle hover:text-fg-primary flex h-10 w-10 cursor-pointer touch-manipulation items-center justify-center rounded-[var(--radius-lg)] p-2 transition-all duration-250 ease-in-out focus:outline-none active:scale-[0.95]"
 	aria-label="Toggle {isDark ? 'light' : 'dark'} mode"
 	type="button"
 >

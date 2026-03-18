@@ -11,13 +11,13 @@
 	:root {
 		/* Spacing Scale (4/8px rhythm) - Consistent Engineering Reality */
 		--space-1: 0.25rem; /* 4px */
-		--space-2: 0.5rem;  /* 8px */
+		--space-2: 0.5rem; /* 8px */
 		--space-3: 0.75rem; /* 12px */
-		--space-4: 1rem;    /* 16px */
-		--space-6: 1.5rem;  /* 24px */
-		--space-8: 2rem;    /* 32px */
-		--space-12: 3rem;   /* 48px */
-		--space-16: 4rem;   /* 64px */
+		--space-4: 1rem; /* 16px */
+		--space-6: 1.5rem; /* 24px */
+		--space-8: 2rem; /* 32px */
+		--space-12: 3rem; /* 48px */
+		--space-16: 4rem; /* 64px */
 
 		/* Backgrounds - Calm Paper-like */
 		--bg-canvas: #fcfbf9;
@@ -31,10 +31,10 @@
 		--background-dark: #1a1513;
 
 		/* Text Hierarchy - Softered for Eye Comfort */
-		--fg-primary: #2a2a2b;   /* Soft Deep Gray */
+		--fg-primary: #2a2a2b; /* Soft Deep Gray */
 		--fg-secondary: #5c5c5e; /* Muted Zinc */
-		--fg-muted: #8a8a8c;     /* Zinc 500 equivalent */
-		--fg-accent: #3a3a3c;    /* Zinc 900 equivalent */
+		--fg-muted: #8a8a8c; /* Zinc 500 equivalent */
+		--fg-accent: #3a3a3c; /* Zinc 900 equivalent */
 
 		/* Buttons/Interactive */
 		--btn-bg: #f5f4f0;
@@ -52,12 +52,14 @@
 		--bg-border: #2c2c2e;
 		--fg-primary: #d1d1d6;
 		--fg-secondary: #8e8e93;
-		--fg-muted: #636366;
+		--fg-muted: #8e8e93; /* Bumped from #636366 for readability */
 		--fg-accent: #f4f4f5;
 		--btn-bg: #1c1c1e;
 		--btn-border: #2c2c2e;
 		--btn-hover: #3a3a3c;
-		--fg-on-primary: #e4e4e7;
+		--fg-on-primary: #ffffff;
+		/* Refine primary in dark: Garnet but slightly brighter for legibility */
+		--primary-action: #a62d2d;
 	}
 }
 
@@ -72,6 +74,8 @@
 	--color-btn-bg: var(--btn-bg);
 	--color-btn-border: var(--btn-border);
 	--color-btn-hover: var(--btn-hover);
+	--color-fg-on-primary: var(--fg-on-primary);
+	--color-primary-action: var(--primary-action, var(--primary));
 
 	--color-primary: var(--primary);
 	--color-accent-gold: var(--accent-gold);
@@ -83,27 +87,30 @@
 	--color-foreground: var(--fg-primary);
 	--color-card: var(--bg-canvas-subtle);
 	--color-card-foreground: var(--fg-primary);
-	--color-border: var(--bg-border);
 	--color-muted-foreground: var(--fg-secondary);
 	--color-input: var(--bg-border);
 	--color-ring: var(--primary);
-	
+
 	/* Radius standardization - Subtle & Professional */
 	--radius-sm: 2px;
-	--radius-md: 4px;
-	--radius-lg: 6px;
-	--radius-xl: 8px;
-	--radius-2xl: 12px;
-	--radius-huge: 16px;
+	--radius-md: 2px; /* Reduced from 4px */
+	--radius-lg: 4px; /* Reduced from 8px - Primary component radius */
+	--radius-xl: 6px;
+	--radius-2xl: 8px;
+	--radius-huge: 8px; /* Reduced from 16px - Card/Dropzone radius */
+
+	/* Transition tokens */
+	--transition-fast: 150ms;
+	--transition-base: 250ms;
 }
 
 @layer utilities {
 	.btn-primary {
-		@apply bg-primary inline-flex items-center justify-center rounded-lg px-6 py-2.5 text-[11px] font-semibold tracking-[0.05em] text-[#ffffff] uppercase transition-all duration-200 hover:brightness-110 active:scale-[0.98];
+		@apply bg-primary-action text-fg-on-primary inline-flex items-center justify-center rounded-[var(--radius-lg)] px-6 py-2 text-[11px] font-semibold tracking-[0.05em] uppercase transition-all duration-250 ease-in-out hover:brightness-110 active:scale-[0.95];
 	}
 
 	.btn-secondary {
-		@apply border-border bg-btn-bg text-fg-secondary hover:bg-btn-hover hover:text-fg-primary inline-flex items-center justify-center rounded-lg border px-4 py-2 text-[11px] font-semibold tracking-[0.05em] uppercase transition-all duration-200 active:scale-[0.98];
+		@apply border-border bg-btn-bg text-fg-secondary hover:bg-btn-hover hover:text-fg-primary inline-flex items-center justify-center rounded-[var(--radius-lg)] border px-4 py-2 text-[11px] font-semibold tracking-[0.05em] uppercase transition-all duration-250 ease-in-out active:scale-[0.95];
 	}
 }
 
@@ -111,8 +118,8 @@
 	font-family: var(--font-display);
 	background-color: var(--bg-canvas);
 	color: var(--fg-primary);
-	line-height: 1.6; /* Improved for comfort */
-	font-size: 16px;
+	line-height: 1.5; /* Compact but legible */
+	font-size: 15px; /* Unified reduction for density */
 	font-feature-settings: 'cv11', 'ss01', 'cv08';
 	-webkit-tap-highlight-color: transparent;
 }
@@ -159,7 +166,7 @@ body {
 }
 
 .section-label {
-	@apply mb-4 block text-[9px] font-bold tracking-[0.3em] text-slate-400 uppercase dark:text-slate-500;
+	@apply mb-4 block text-[9px] font-bold tracking-[0.3em] text-slate-400 uppercase dark:text-slate-400;
 }
 
 * {

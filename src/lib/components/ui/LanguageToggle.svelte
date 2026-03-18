@@ -78,9 +78,7 @@
 		}
 	}
 
-	const currentLangInfo = $derived(
-		languages.find((l) => l.id === lang) || languages[0]
-	);
+	const currentLangInfo = $derived(languages.find((l) => l.id === lang) || languages[0]);
 </script>
 
 <div class="relative" bind:this={dropdownElement}>
@@ -111,15 +109,15 @@
 
 	{#if isOpen}
 		<div
-			transition:fly={{ y: 5, duration: 200 }}
-			class="bg-canvas border-border shadow-huge absolute right-0 mt-2 min-w-[120px] overflow-hidden rounded-[var(--radius-lg)] border z-50"
+			transition:fly={{ y: 5, duration: 150 }}
+			class="bg-canvas border-border shadow-huge absolute right-0 z-50 mt-2 min-w-[120px] overflow-hidden rounded-[var(--radius-lg)] border"
 			role="listbox"
 		>
 			<div class="flex flex-col p-1.5">
 				{#each languages as language (language.id)}
 					<button
 						onclick={() => selectLanguage(language.id)}
-						class="hover:bg-canvas-subtle group flex w-full items-center justify-between rounded-[var(--radius-md)] px-3 py-2 text-left text-[13px] transition-colors"
+						class="hover:bg-canvas-subtle group flex w-full items-center justify-between rounded-[var(--radius-md)] px-3 py-2 text-left text-[13px] transition-colors duration-150"
 						class:text-fg-primary={lang === language.id}
 						class:bg-canvas-subtle={lang === language.id}
 						class:text-fg-secondary={lang !== language.id}

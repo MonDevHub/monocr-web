@@ -220,32 +220,36 @@
 
 <div class="mx-auto w-full max-w-3xl">
 	<!-- Header -->
-	<header class="mb-12 space-y-4 text-center">
-		<p class="text-fg-primary mx-auto mt-8 max-w-2xl text-[20px] leading-tight font-medium tracking-tight">
-			Private Mon OCR. Optimized for high-accuracy archival digitization, running entirely in your browser.
+	<header class="mb-8 space-y-4 text-center">
+		<p
+			class="text-fg-primary mx-auto mt-4 max-w-2xl text-[20px] leading-tight font-medium tracking-tight"
+		>
+			Private Mon OCR. Optimized for high-accuracy archival digitization, running entirely in your
+			browser.
 		</p>
 		<p class="text-fg-muted mx-auto max-w-lg text-[12px] font-medium tracking-wide">
-			Requires Hardware Acceleration (GPU) and 4GB+ RAM. Model (26.3MB) is cached locally for offline use.
+			Requires Hardware Acceleration (GPU) and 4GB+ RAM. Model (26.3MB) is cached locally for
+			offline use.
 		</p>
 
 		<div class="flex justify-center pt-2">
 			{#if !engineReady && !error}
 				<div
-					class="border-border bg-canvas-subtle text-fg-muted inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold tracking-wider uppercase"
+					class="border-border bg-canvas-subtle text-fg-muted inline-flex items-center gap-2 rounded-md border px-3 py-1 text-[11px] font-semibold tracking-wider uppercase"
 				>
-					<div class="h-1 w-1 animate-pulse rounded-full bg-fg-muted"></div>
+					<div class="bg-fg-muted h-1 w-1 animate-pulse rounded-full"></div>
 					Initializing OCR Engine...
 				</div>
 			{:else if error}
 				<div
-					class="inline-flex items-center gap-2 rounded-full border border-red-100 bg-red-50/30 px-3 py-1 text-[11px] font-semibold tracking-wider text-red-600/80 uppercase dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400"
+					class="inline-flex items-center gap-2 rounded-md border border-red-100 bg-red-50/30 px-3 py-1 text-[11px] font-semibold tracking-wider text-red-600/80 uppercase dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400"
 				>
 					<div class="h-1 w-1 rounded-full bg-current"></div>
 					{error}
 				</div>
 			{:else}
 				<div
-					class="border-border bg-canvas-subtle text-fg-muted inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold tracking-wider uppercase"
+					class="border-border bg-canvas-subtle text-fg-muted inline-flex items-center gap-1.5 rounded-md border px-3 py-1 text-[11px] font-semibold tracking-wider uppercase"
 					in:fade
 				>
 					<div class="h-1 w-1 rounded-full bg-emerald-500/60 dark:bg-emerald-500/40"></div>
@@ -260,7 +264,7 @@
 		{#if !file}
 			<div in:fade={{ duration: 300 }}>
 				<div
-					class="hover:bg-canvas-subtle group relative flex flex-col items-center justify-center rounded-[var(--radius-huge)] border border-border py-24 transition-all duration-500"
+					class="hover:bg-canvas-subtle group border-border relative flex flex-col items-center justify-center rounded-[var(--radius-huge)] border py-12 transition-all duration-250"
 					ondragover={handleDragOver}
 					ondragleave={handleDragLeave}
 					ondrop={handleDrop}
@@ -410,7 +414,10 @@
 									onclick={reportError}
 									aria-label="Report Error or feedback for this result"
 								>
-									<span class="material-symbols-outlined text-[16px] opacity-40 group-hover:opacity-100">flag</span>
+									<span
+										class="material-symbols-outlined text-[16px] opacity-40 group-hover:opacity-100"
+										>flag</span
+									>
 									<span>Report</span>
 								</button>
 							</div>
