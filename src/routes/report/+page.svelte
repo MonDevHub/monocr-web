@@ -41,7 +41,7 @@
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 
 		// Success
-		alert('Thank you for helping improve MonOCR!');
+		alert('Got it! Thanks for the feedback!');
 		await goto('/');
 	}
 
@@ -59,7 +59,7 @@
 	<main id="main-content" class="mx-auto w-full max-w-2xl space-y-4 p-4 md:p-6">
 		<!-- Original Source Selection -->
 		<header class="mb-4 space-y-1 text-center">
-			<h1 class="text-2xl font-bold tracking-tight">Improve Engine</h1>
+			<h1 class="text-2xl font-bold tracking-tight">Accuracy Feedback</h1>
 		</header>
 		<!-- Original Source Selection -->
 		<section>
@@ -181,7 +181,7 @@
 						>I want to help improve MonOCR</label
 					>
 					<p class="text-fg-muted leading-snug opacity-80">
-						Allow this correction to be used for research and academic model improvements.
+						Allow this feedback to be used for model verification and archival research.
 					</p>
 				</div>
 			</div>

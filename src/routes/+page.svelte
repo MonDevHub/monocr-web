@@ -18,7 +18,6 @@
 	let processingTime = $state(0);
 	let copied = $state(false);
 	let isPdf = $state(false);
-	let processingProgress = $state('');
 	let totalPages = $state(0);
 	let fileInput = $state<HTMLInputElement>();
 
@@ -118,8 +117,6 @@
 			const startTime = performance.now();
 
 			for (let i = 1; i <= totalPages; i++) {
-				processingProgress = `Processing page ${i} of ${totalPages}...`;
-
 				// 1. Render page using the loaded pdf proxy
 				const { imageBytes } = await renderPdfPage(pdf, i);
 
@@ -140,12 +137,10 @@
 			resultText = allTexts.join('\n\n');
 			const endTime = performance.now();
 			processingTime = Math.round(endTime - startTime);
-			processingProgress = '';
-		} catch (e: unknown) {
-			console.error(e);
-			const msg = e instanceof Error ? e.message : String(e);
+		} catch (err: unknown) {
+			console.error('PDF Processing Error:', err);
+			const msg = err instanceof Error ? err.message : 'Check your file and try again ah.';
 			error = `PDF Processing Failed: ${msg}`;
-			processingProgress = '';
 		} finally {
 			loading = false;
 		}
@@ -222,14 +217,13 @@
 	<!-- Header -->
 	<header class="mb-8 space-y-4 text-center">
 		<p
-			class="text-fg-primary mx-auto mt-4 max-w-2xl text-[20px] leading-tight font-medium tracking-tight"
+			class="text-fg-primary text-shimmer animate-fade-in mx-auto mt-4 max-w-2xl text-[20px] leading-tight font-medium tracking-tight"
 		>
-			Private Mon OCR. Optimized for high-accuracy archival digitization, running entirely in your
-			browser.
+			Digitize Mon texts effortlessly. High-precision OCR running right in your browser.
 		</p>
 		<p class="text-fg-muted mx-auto max-w-lg text-[12px] font-medium tracking-wide">
-			Requires Hardware Acceleration (GPU) and 4GB+ RAM. Model (26.3MB) is cached locally for
-			offline use.
+			Security-First: All processing occurs locally. Requires WebGL/WebGPU acceleration and 4GB+
+			RAM.
 		</p>
 
 		<div class="flex justify-center pt-2">
@@ -238,7 +232,7 @@
 					class="border-border bg-canvas-subtle text-fg-muted inline-flex items-center gap-2 rounded-md border px-3 py-1 text-[11px] font-semibold tracking-wider uppercase"
 				>
 					<div class="bg-fg-muted h-1 w-1 animate-pulse rounded-full"></div>
-					Initializing OCR Engine...
+					Initializing... wait a moment ah.
 				</div>
 			{:else if error}
 				<div
@@ -253,7 +247,7 @@
 					in:fade
 				>
 					<div class="h-1 w-1 rounded-full bg-emerald-500/60 dark:bg-emerald-500/40"></div>
-					Engine Ready
+					All set! Ready for you.
 				</div>
 			{/if}
 		</div>
@@ -294,7 +288,7 @@
 
 						<div class="space-y-4">
 							<h3 class="text-fg-primary text-base font-semibold tracking-tight">
-								Drop an image or PDF to begin
+								Drop an image or PDF here
 							</h3>
 							<p class="text-fg-muted text-[13px] font-medium tracking-wide">
 								Your data never leaves your device
@@ -317,13 +311,13 @@
 						class="text-fg-secondary hover:text-fg-primary hover:bg-canvas-subtle border-border bg-canvas flex min-h-[36px] items-center gap-2 rounded-lg border px-3 py-1 text-[11px] font-bold tracking-wider uppercase transition-all"
 						aria-label="Process another image or PDF"
 					>
-						Process another image/PDF
+						Try another one
 					</button>
 				</div>
 
 				<!-- Result -->
 				<div
-					class="border-border bg-canvas flex min-h-[250px] flex-col overflow-hidden rounded-xl border shadow-sm"
+					class="border-border bg-canvas animate-fade-in-up flex min-h-[250px] flex-col overflow-hidden rounded-xl border shadow-sm"
 				>
 					<div
 						class="border-border bg-canvas-subtle flex items-center justify-between border-b px-5 py-3"
@@ -354,8 +348,8 @@
 									<div
 										class="border-primary-500 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"
 									></div>
-									<span class="text-fg-secondary text-sm font-medium">
-										{processingProgress || 'Scanning...'}
+									<span class="text-fg-secondary animate-pulse text-sm font-medium">
+										Still scanning... wait ah.
 									</span>
 								</div>
 							</div>

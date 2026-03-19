@@ -13,7 +13,7 @@
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 
 		// Success
-		alert('Thank you for contributing to MonOCR!');
+		alert('Done! Thanks for helping out!');
 		await goto('/');
 	}
 </script>
@@ -30,10 +30,10 @@
 		<div class="mx-auto max-w-2xl px-6 py-2">
 			<header class="mb-2 text-center">
 				<h2 class="text-fg-primary mb-0.5 text-[18px] font-semibold tracking-tight">
-					Help Preserve Heritage
+					Preserve Our Heritage
 				</h2>
 				<p class="text-fg-muted text-[13px] font-medium tracking-wide">
-					Your contributions help improve OCR accuracy for the Mon script.
+					Contribute Mon documents to improve recognition accuracy and archival quality.
 				</p>
 			</header>
 
@@ -64,9 +64,11 @@
 							</span>
 						</div>
 						<div class="space-y-1">
-							<h3 class="text-fg-primary text-sm font-semibold tracking-tight">Upload Mon scans</h3>
+							<h3 class="text-fg-primary text-sm font-semibold tracking-tight">
+								Submit Mon Documents
+							</h3>
 							<p class="text-fg-muted text-[11px] font-medium tracking-wide uppercase opacity-60">
-								PDF, Images, or Text
+								PDF, Images, or Structured Text
 							</p>
 						</div>
 					</div>
