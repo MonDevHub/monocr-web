@@ -84,6 +84,7 @@
 		]
 	},
 	"dependencies": {
+		"dexie": "^4.3.0",
 		"onnxruntime-web": "^1.24.3",
 		"pdfjs-dist": "^4.10.38"
 	},

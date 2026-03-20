@@ -6,6 +6,8 @@
 	import { CONFIG } from '$lib/config';
 	import { renderPdfPage, loadPdf } from '$lib/utils/pdf-util';
 	import { feedbackStore } from '$lib/stores/feedback';
+	import { HistorySection } from '$lib/components';
+	import { saveRecord } from '$lib/storage/db';
 	import { goto } from '$app/navigation';
 
 	let engineReady = $state(false);
@@ -20,6 +22,13 @@
 	let isPdf = $state(false);
 	let totalPages = $state(0);
 	let fileInput = $state<HTMLInputElement>();
+
+	// History reference for refreshing
+	let historySection: ReturnType<typeof HistorySection>;
+
+	async function loadHistory() {
+		historySection?.refresh();
+	}
 
 	function handleDragOver(e: DragEvent) {
 		e.preventDefault();
@@ -48,7 +57,7 @@
 	onMount(async () => {
 		try {
 			loading = true;
-			await initializeEngine();
+			await Promise.all([initializeEngine(), loadHistory()]);
 			engineReady = true;
 		} catch (e: unknown) {
 			const msg = e instanceof Error ? e.message : String(e);
@@ -115,6 +124,7 @@
 
 			const allTexts: string[] = [];
 			const startTime = performance.now();
+			let firstPageBlob: Blob | null = null;
 
 			for (let i = 1; i <= totalPages; i++) {
 				// 1. Render page using the loaded pdf proxy
@@ -123,8 +133,8 @@
 				// 2. Set preview for first page only
 				if (i === 1) {
 					if (previewUrl) URL.revokeObjectURL(previewUrl);
-					const blob = new Blob([imageBytes.buffer as ArrayBuffer], { type: 'image/jpeg' });
-					previewUrl = URL.createObjectURL(blob);
+					firstPageBlob = new Blob([imageBytes.buffer as ArrayBuffer], { type: 'image/jpeg' });
+					previewUrl = URL.createObjectURL(firstPageBlob);
 				}
 
 				// 3. Run OCR
@@ -137,9 +147,24 @@
 			resultText = allTexts.join('\n\n');
 			const endTime = performance.now();
 			processingTime = Math.round(endTime - startTime);
+
+			// Save to history (using first page as representative image)
+			if (firstPageBlob) {
+				await saveRecord(
+					{
+						fileName: file.name,
+						fileType: 'application/pdf',
+						fileData: firstPageBlob,
+						text: resultText,
+						processingTime
+					},
+					'ocr-scan'
+				);
+				await loadHistory();
+			}
 		} catch (err: unknown) {
 			console.error('PDF Processing Error:', err);
-			const msg = err instanceof Error ? err.message : 'Check your file and try again ah.';
+			const msg = err instanceof Error ? err.message : 'Please check your file and try again.';
 			error = `PDF Processing Failed: ${msg}`;
 		} finally {
 			loading = false;
@@ -162,6 +187,19 @@
 
 			const end = performance.now();
 			processingTime = Math.round(end - start);
+
+			// Save to history
+			await saveRecord(
+				{
+					fileName: file.name,
+					fileType: file.type,
+					fileData: file,
+					text,
+					processingTime
+				},
+				'ocr-scan'
+			);
+			await loadHistory();
 		} catch (e: unknown) {
 			console.error(e);
 			const msg = e instanceof Error ? e.message : String(e);
@@ -215,15 +253,14 @@
 
 <div class="mx-auto w-full max-w-3xl">
 	<!-- Header -->
-	<header class="mb-8 space-y-4 text-center">
+	<header class="mb-4 space-y-2 text-center">
 		<p
-			class="text-fg-primary text-shimmer animate-fade-in mx-auto mt-4 max-w-2xl text-[20px] leading-tight font-medium tracking-tight"
+			class="text-fg-primary mx-auto mt-2 max-w-2xl text-[20px] leading-tight font-medium tracking-tight text-balance"
 		>
 			Digitize Mon texts effortlessly. High-precision OCR running right in your browser.
 		</p>
 		<p class="text-fg-muted mx-auto max-w-lg text-[12px] font-medium tracking-wide">
-			Security-First: All processing occurs locally. Requires WebGL/WebGPU acceleration and 4GB+
-			RAM.
+			Security-First: All processing occurs locally. Requires WebGL/WebGPU acceleration.
 		</p>
 
 		<div class="flex justify-center pt-2">
@@ -232,7 +269,7 @@
 					class="border-border bg-canvas-subtle text-fg-muted inline-flex items-center gap-2 rounded-md border px-3 py-1 text-[11px] font-semibold tracking-wider uppercase"
 				>
 					<div class="bg-fg-muted h-1 w-1 animate-pulse rounded-full"></div>
-					Initializing... wait a moment ah.
+					Initializing...
 				</div>
 			{:else if error}
 				<div
@@ -247,18 +284,18 @@
 					in:fade
 				>
 					<div class="h-1 w-1 rounded-full bg-emerald-500/60 dark:bg-emerald-500/40"></div>
-					All set! Ready for you.
+					System Ready
 				</div>
 			{/if}
 		</div>
 	</header>
 
 	<!-- Main Content -->
-	<main id="main-content" class="space-y-8">
+	<main id="main-content" class="space-y-6">
 		{#if !file}
-			<div in:fade={{ duration: 300 }}>
+			<div in:fade={{ duration: 150 }}>
 				<div
-					class="hover:bg-canvas-subtle group border-border relative flex flex-col items-center justify-center rounded-[var(--radius-huge)] border py-12 transition-all duration-250"
+					class="hover:bg-canvas-subtle group border-border relative flex flex-col items-center justify-center rounded-[var(--radius-huge)] border py-6 transition-all duration-150"
 					ondragover={handleDragOver}
 					ondragleave={handleDragLeave}
 					ondrop={handleDrop}
@@ -275,12 +312,12 @@
 						class="hidden"
 					/>
 
-					<div class="flex flex-col items-center space-y-12 text-center">
+					<div class="flex flex-col items-center space-y-6 text-center">
 						<div
-							class="bg-primary/5 group-hover:bg-primary/10 flex h-14 w-14 items-center justify-center rounded-full transition-all duration-500"
+							class="bg-primary/5 group-hover:bg-primary/10 flex h-14 w-14 items-center justify-center rounded-full transition-all duration-300"
 						>
 							<span
-								class="material-symbols-outlined text-primary text-2xl font-light transition-transform duration-500 group-hover:scale-110"
+								class="material-symbols-outlined text-primary text-2xl font-light transition-transform duration-300 group-hover:scale-110"
 							>
 								upload
 							</span>
@@ -291,7 +328,7 @@
 								Drop an image or PDF here
 							</h3>
 							<p class="text-fg-muted text-[13px] font-medium tracking-wide">
-								Your data never leaves your device
+								Secure local processing
 							</p>
 						</div>
 					</div>
@@ -300,15 +337,15 @@
 		{:else}
 			<div class="mx-auto flex w-full max-w-2xl flex-col gap-6" in:fly={{ y: 20, duration: 400 }}>
 				<!-- Image Preview -->
-				<div class="flex flex-col space-y-3">
+				<div class="flex flex-col space-y-2">
 					<div
-						class="border-border bg-canvas-subtle relative flex min-h-[150px] flex-1 items-center justify-center overflow-hidden rounded-xl border p-4 shadow-sm"
+						class="border-border bg-canvas-subtle relative flex min-h-[120px] flex-1 items-center justify-center overflow-hidden rounded-lg border p-3 shadow-sm"
 					>
-						<img src={previewUrl} alt="Preview" class="h-auto max-h-[30vh] w-full object-contain" />
+						<img src={previewUrl} alt="Preview" class="h-auto max-h-[25vh] w-full object-contain" />
 					</div>
 					<button
 						onclick={reset}
-						class="text-fg-secondary hover:text-fg-primary hover:bg-canvas-subtle border-border bg-canvas flex min-h-[36px] items-center gap-2 rounded-lg border px-3 py-1 text-[11px] font-bold tracking-wider uppercase transition-all"
+						class="text-fg-secondary hover:text-fg-primary hover:bg-canvas-subtle border-border bg-canvas flex min-h-[32px] items-center gap-2 rounded-lg border px-3 py-1 text-[11px] font-bold tracking-wider uppercase transition-all"
 						aria-label="Process another image or PDF"
 					>
 						Try another one
@@ -349,7 +386,7 @@
 										class="border-primary-500 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"
 									></div>
 									<span class="text-fg-secondary animate-pulse text-sm font-medium">
-										Still scanning... wait ah.
+										Scanning document...
 									</span>
 								</div>
 							</div>
@@ -380,18 +417,18 @@
 
 					{#if resultText}
 						<div
-							class="border-border bg-canvas-subtle flex items-center justify-between border-t px-8 py-3"
+							class="border-border bg-canvas-subtle flex items-center justify-between border-t px-6 py-2.5"
 						>
-							<div class="flex items-center gap-4">
+							<div class="flex items-center gap-3">
 								<button
-									class="btn-secondary px-4 py-1"
+									class="btn-secondary px-3 py-1"
 									onclick={downloadText}
 									aria-label="Save extracted text as a file"
 								>
 									Download
 								</button>
 								<button
-									class="btn-secondary px-4 py-1"
+									class="btn-secondary px-3 py-1"
 									onclick={() => {
 										navigator.clipboard.writeText(resultText || '');
 										copied = true;
@@ -420,6 +457,8 @@
 				</div>
 			</div>
 		{/if}
+
+		<HistorySection bind:this={historySection} category="ocr-scan" title="Recent Scans" />
 	</main>
 </div>
 

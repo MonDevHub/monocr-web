@@ -8,7 +8,7 @@
 	const { href, variant = 'primary', children }: Props = $props();
 
 	const variantClass = $derived(
-		variant === 'primary' ? 'btn-primary min-h-[38px]' : 'btn-secondary min-h-[38px]'
+		variant === 'primary' ? 'btn-primary min-h-[36px] px-6' : 'btn-secondary min-h-[36px] px-5'
 	);
 
 	const ariaLabel = $derived(href.startsWith('mailto:') ? 'Send email' : undefined);
