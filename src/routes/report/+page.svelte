@@ -4,8 +4,11 @@
 	import { get } from 'svelte/store';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { SEO } from '$lib/components';
+	import { SEO, HistorySection, SuccessModal } from '$lib/components';
+	import { saveRecord } from '$lib/storage/db';
 
+	let loading = $state(false);
+	let showSuccessModal = $state(false);
 	let originalText = $state('');
 	let correctedText = $state('');
 	let previewUrl = $state<string | null>(null);
@@ -13,6 +16,8 @@
 	let consent = $state(false);
 	let sourceFile = $state<File | null>(null);
 	let sourceFileInput: HTMLInputElement;
+
+	let historySection: ReturnType<typeof HistorySection>;
 
 	onMount(() => {
 		const data = get(feedbackStore);
@@ -37,12 +42,43 @@
 	async function handleSubmit() {
 		if (!correctedText || !consent) return;
 
-		// Simulate API call
-		await new Promise((resolve) => setTimeout(resolve, 1000));
+		loading = true;
+		try {
+			// Save to history
+			if (sourceFile) {
+				await saveRecord(
+					{
+						fileName: `Feedback: ${sourceFile.name}`,
+						fileType: sourceFile.type,
+						fileData: sourceFile,
+						text: correctedText,
+						processingTime: 0
+					},
+					'feedback'
+				);
+			} else {
+				// Fallback if no file (e.g. from state)
+				await saveRecord(
+					{
+						fileName: `Feedback: ${selectedType}`,
+						fileType: 'text/plain',
+						fileData: new Blob([originalText], { type: 'text/plain' }),
+						text: correctedText,
+						processingTime: 0
+					},
+					'feedback'
+				);
+			}
 
-		// Success
-		alert('Thank you for helping improve MonOCR!');
-		await goto('/');
+			// Success
+			showSuccessModal = true;
+			historySection?.refresh();
+		} catch (e) {
+			console.error('Failed to submit feedback:', e);
+			alert('Failed to save feedback history.');
+		} finally {
+			loading = false;
+		}
 	}
 
 	async function handleCancel() {
@@ -56,16 +92,16 @@
 />
 
 <div class="font-display relative flex flex-col overflow-x-hidden">
-	<main id="main-content" class="mx-auto w-full max-w-2xl space-y-4 p-4 md:p-6">
+	<main id="main-content" class="mx-auto w-full max-w-2xl space-y-3 p-4 md:p-6">
 		<!-- Original Source Selection -->
-		<header class="mb-4 space-y-1 text-center">
-			<h1 class="text-2xl font-bold tracking-tight">Improve Engine</h1>
+		<header class="mb-2 space-y-1 text-center">
+			<h1 class="text-xl font-bold tracking-tight">Accuracy Feedback</h1>
 		</header>
 		<!-- Original Source Selection -->
 		<section>
 			<h3 class="section-label">Original Source</h3>
 			<div
-				class="group border-border bg-canvas-subtle/50 hover:bg-canvas-subtle/80 relative flex cursor-pointer flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed py-6 transition-all duration-250"
+				class="group border-border bg-canvas-subtle/50 hover:bg-canvas-subtle/80 relative flex cursor-pointer flex-col items-center justify-center rounded-md border border-dashed py-4 transition-all duration-150"
 				onclick={() => sourceFileInput.click()}
 				onkeydown={(e) => e.key === 'Enter' && sourceFileInput.click()}
 				role="button"
@@ -96,9 +132,7 @@
 			<!-- Original Output Section -->
 			<section>
 				<h3 class="section-label">Original Output</h3>
-				<div
-					class="border-border bg-canvas-subtle overflow-hidden rounded-[var(--radius-lg)] border"
-				>
+				<div class="border-border bg-canvas-subtle overflow-hidden rounded-md border">
 					<div class="p-4">
 						<div class="flex flex-col gap-4">
 							{#if previewUrl}
@@ -129,17 +163,17 @@
 
 		<!-- Corrected Text Section -->
 		<section>
-			<div class="mb-4 flex items-center justify-between">
+			<div class="mb-2 flex items-center justify-between">
 				<h3 class="section-label mb-0">Corrected Text</h3>
-				<span class="text-fg-muted text-[9px] font-medium tracking-widest uppercase"
-					>Verified by humans</span
+				<span class="text-fg-muted text-[8px] font-medium tracking-widest uppercase"
+					>Human Verification</span
 				>
 			</div>
-			<div class="flex flex-col gap-4">
+			<div class="flex flex-col gap-3">
 				<label class="block">
 					<textarea
 						bind:value={correctedText}
-						class="focus:border-primary focus:ring-primary/5 border-border bg-canvas text-fg-primary placeholder:text-fg-muted/40 block w-full resize-y rounded-[var(--radius-lg)] border px-4 py-3 text-sm transition-all duration-250 placeholder:text-[12px]"
+						class="focus:border-primary focus:ring-primary/5 border-border bg-canvas text-fg-primary placeholder:text-fg-muted/40 block w-full resize-y rounded-md border px-3 py-2 text-[13px] transition-all duration-150 placeholder:text-[11px]"
 						rows="3"
 						placeholder="Corrected Mon script..."
 					></textarea>
@@ -150,11 +184,11 @@
 		<!-- Error Categories -->
 		<section>
 			<h3 class="section-label">Error Type</h3>
-			<div class="flex flex-wrap gap-2">
+			<div class="flex flex-wrap gap-1.5">
 				{#each ['Spelling', 'Layout', 'Formatting', 'Other'] as type (type)}
 					<button
 						onclick={() => (selectedType = type)}
-						class="rounded-[var(--radius-lg)] border px-3 py-1 text-[10px] font-bold transition-all {selectedType ===
+						class="rounded-md border px-2.5 py-1 text-[9px] font-bold transition-all {selectedType ===
 						type
 							? 'border-primary bg-primary text-white'
 							: 'border-border text-fg-muted hover:border-fg-secondary hover:bg-canvas-subtle'}"
@@ -166,35 +200,46 @@
 		</section>
 
 		<!-- Consent & Actions -->
-		<section class="border-border space-y-6 border-t pt-4">
-			<div class="flex items-start gap-4">
+		<section class="border-border space-y-4 border-t pt-3">
+			<div class="flex items-start gap-3">
 				<div class="flex h-5 items-center">
 					<input
 						type="checkbox"
 						id="consent"
 						bind:checked={consent}
-						class="text-primary focus:ring-primary border-border bg-canvas h-4 w-4 cursor-pointer rounded"
+						class="text-primary focus:ring-primary border-border bg-canvas h-4 w-4 cursor-pointer rounded-sm"
 					/>
 				</div>
-				<div class="text-[13px]">
+				<div class="text-[12px]">
 					<label class="text-fg-primary cursor-pointer font-medium" for="consent"
 						>I want to help improve MonOCR</label
 					>
-					<p class="text-fg-muted leading-snug opacity-80">
-						Allow this correction to be used for research and academic model improvements.
+					<p class="text-fg-muted leading-snug opacity-70">
+						Allow this feedback to be used for model verification.
 					</p>
 				</div>
 			</div>
-			<div class="mx-auto flex w-full max-w-sm flex-col gap-2 pt-6">
+			<div class="mx-auto flex w-full max-w-sm flex-col gap-2 pt-2">
 				<button
 					onclick={handleSubmit}
-					disabled={!correctedText || !consent}
+					disabled={!correctedText || !consent || loading}
 					class="btn-primary w-full"
 				>
-					Share Correction
+					{loading ? 'Sharing...' : 'Share Correction'}
 				</button>
-				<button onclick={handleCancel} class="btn-secondary w-full"> Cancel and discard </button>
+				<button onclick={handleCancel} class="btn-secondary w-full"> Cancel </button>
 			</div>
 		</section>
+
+		<HistorySection bind:this={historySection} category="feedback" title="Past Feedback" />
 	</main>
+
+	<SuccessModal
+		isOpen={showSuccessModal}
+		title="Feedback Received"
+		message="Thanks for helping us improve MonOCR! Your correction has been saved."
+		onClose={() => {
+			showSuccessModal = false;
+		}}
+	/>
 </div>

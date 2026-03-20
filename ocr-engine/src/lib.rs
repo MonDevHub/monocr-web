@@ -101,8 +101,8 @@ impl MonOcr {
              return (vec![-0.5], 1, 1);
         }
 
-        // 2. Resize to height 64, maintaining aspect ratio
-        let target_h = 64;
+        // 2. Resize to height 128, maintaining aspect ratio
+        let target_h = 128;
         let scale = target_h as f32 / height as f32;
         let new_w = (width as f32 * scale) as u32;
         let target_w = 1024;

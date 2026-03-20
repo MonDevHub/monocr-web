@@ -179,7 +179,8 @@ export async function initializeEngine(): Promise<void> {
 export async function recognize(imageBytes: Uint8Array): Promise<string> {
 	try {
 		await initializeEngine();
-		return await request<string>('RECOGNIZE', imageBytes);
+		// Senior tip: Use transferables to avoid copying large image buffers
+		return await request<string>('RECOGNIZE', imageBytes, [imageBytes.buffer]);
 	} catch (e: unknown) {
 		const error =
 			e instanceof OcrError ? e : new OcrError(`Recognition failed: ${e}`, 'RECOGNIZE_FAILED', e);
