@@ -95,7 +95,7 @@
 	<main id="main-content" class="mx-auto w-full max-w-2xl space-y-3 p-4 md:p-6">
 		<!-- Original Source Selection -->
 		<header class="mb-2 space-y-1 text-center">
-			<h1 class="text-xl font-bold tracking-tight">Accuracy Feedback</h1>
+			<h1 class="font-bold tracking-tight text-[var(--text-title)]">Accuracy Feedback</h1>
 		</header>
 		<!-- Original Source Selection -->
 		<section>
@@ -119,10 +119,12 @@
 						<span class="material-symbols-outlined text-fg-muted text-lg">upload_file</span>
 					</div>
 					<div class="text-left">
-						<p class="text-fg-primary text-[13px] font-semibold">
+						<p class="text-fg-primary font-semibold text-[var(--text-secondary)]">
 							{sourceFile ? sourceFile.name : 'Upload Original Scan'}
 						</p>
-						<p class="text-fg-muted text-[10px] tracking-wider uppercase">Image or PDF</p>
+						<p class="text-fg-muted tracking-wider text-[var(--text-meta)] uppercase">
+							Image or PDF
+						</p>
 					</div>
 				</div>
 			</div>
@@ -147,11 +149,11 @@
 								</div>
 							{/if}
 							<p
-								class="border-primary/40 bg-canvas-subtle/50 text-fg-secondary border-l-2 py-1.5 pl-4 text-sm leading-relaxed italic"
+								class="border-primary/40 bg-canvas-subtle/50 text-fg-secondary border-l-2 py-1.5 pl-4 leading-relaxed text-[var(--text-body)] italic"
 							>
 								"{originalText}"
 							</p>
-							<div class="text-fg-muted flex items-center gap-2 text-xs">
+							<div class="text-fg-muted flex items-center gap-2 text-[var(--text-meta)]">
 								<span class="material-symbols-outlined text-sm">info</span>
 								<span>Report quality issues to help improve our model</span>
 							</div>
@@ -173,7 +175,7 @@
 				<label class="block">
 					<textarea
 						bind:value={correctedText}
-						class="focus:border-primary focus:ring-primary/5 border-border bg-canvas text-fg-primary placeholder:text-fg-muted/40 block w-full resize-y rounded-md border px-3 py-2 text-[13px] transition-all duration-150 placeholder:text-[11px]"
+						class="focus:border-primary focus:ring-primary/5 border-border bg-canvas text-fg-primary placeholder:text-fg-muted/40 block w-full resize-y rounded-md border px-3 py-2 text-[var(--text-secondary)] transition-all duration-150 placeholder:text-[var(--text-meta)]"
 						rows="3"
 						placeholder="Corrected Mon script..."
 					></textarea>
@@ -210,7 +212,7 @@
 						class="text-primary focus:ring-primary border-border bg-canvas h-4 w-4 cursor-pointer rounded-sm"
 					/>
 				</div>
-				<div class="text-[12px]">
+				<div class="text-[var(--text-meta)]">
 					<label class="text-fg-primary cursor-pointer font-medium" for="consent"
 						>I want to help improve MonOCR</label
 					>

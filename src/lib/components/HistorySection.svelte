@@ -60,9 +60,9 @@
 </script>
 
 {#if historyRecords.length > 0}
-	<section class="mt-10 space-y-4" in:fade={{ duration: 150 }}>
+	<section class="mt-8 space-y-4" in:fade={{ duration: 150 }}>
 		<div class="flex items-center justify-between">
-			<h2 class="text-fg-primary text-lg font-bold tracking-tight">
+			<h2 class="text-fg-primary font-bold tracking-tight text-[var(--text-title)]">
 				{title}
 				{#if loading}
 					<span class="text-fg-muted ml-2 text-xs font-normal opacity-50">Updating...</span>
@@ -70,8 +70,10 @@
 			</h2>
 			<button
 				onclick={async () => {
-					await clearHistory(category);
-					await loadHistory();
+					if (confirm('Are you sure you want to permanently delete all scans in this category?')) {
+						await clearHistory(category);
+						await loadHistory();
+					}
 				}}
 				class="text-fg-secondary text-[11px] font-bold tracking-wider uppercase transition-colors hover:text-red-500"
 			>
@@ -79,7 +81,7 @@
 			</button>
 		</div>
 
-		<div class="space-y-1.5">
+		<div class="space-y-2">
 			{#each historyRecords as record (record.id)}
 				<div
 					class="border-border bg-canvas-subtle hover:bg-canvas group relative flex items-center justify-between rounded-[var(--radius-md)] border px-3 py-1.5 transition-all duration-150 select-none"
@@ -114,7 +116,7 @@
 							class="text-fg-muted opacity-0 transition-all group-hover:opacity-100 hover:text-red-500"
 							aria-label="Delete record"
 						>
-							<span class="material-symbols-outlined text-[18px]">close</span>
+							<span class="material-symbols-outlined text-[18px]">delete</span>
 						</button>
 					</div>
 				</div>
@@ -189,7 +191,7 @@
 					</div>
 					<div class="flex-1 overflow-y-auto">
 						<p
-							class="font-mon text-fg-primary selection:bg-primary/20 text-sm leading-relaxed break-words whitespace-pre-wrap"
+							class="font-mon text-fg-primary selection:bg-primary/20 leading-relaxed break-words whitespace-pre-wrap text-[var(--text-body)]"
 						>
 							{selectedRecord.text}
 						</p>

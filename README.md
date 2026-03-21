@@ -1,6 +1,7 @@
-# MonOCR Web
-
 A privacy-focused, in-browser OCR tool for the Mon language (mnw), built with Rust and WebAssembly.
+
+> [!NOTE]
+> This project follows the [Product Quality Constitution](.agents/workflows/constitution.md) for clarity and calmness.
 
 ## Overview
 

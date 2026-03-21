@@ -22,8 +22,9 @@ export interface PdfPageResult {
 export async function renderPdfPage(
 	pdfInput: ArrayBuffer | Uint8Array | pdfjs.PDFDocumentProxy,
 	pageNumber: number = 1,
-	scale: number = 4.0
+	scale: number = 4.16 // Senior Tip: 300 DPI (4.16) for optimal OCR accuracy
 ): Promise<PdfPageResult> {
+
 	let pdf: pdfjs.PDFDocumentProxy;
 
 	if ('numPages' in pdfInput) {
@@ -51,7 +52,13 @@ export async function renderPdfPage(
 	canvas.height = viewport.height;
 	canvas.width = viewport.width;
 
+	// Senior Tip: Always clear to white first to prevent transparent PDFs
+	// from inheriting accidental dark backgrounds during JPG conversion
+	context.fillStyle = 'white';
+	context.fillRect(0, 0, canvas.width, canvas.height);
+
 	const renderContext = {
+
 		canvasContext: context,
 		viewport: viewport
 	};

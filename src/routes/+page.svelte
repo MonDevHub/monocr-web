@@ -253,13 +253,13 @@
 
 <div class="mx-auto w-full max-w-3xl">
 	<!-- Header -->
-	<header class="mb-4 space-y-2 text-center">
+	<header class="mb-1 space-y-1 text-center">
 		<p
-			class="text-fg-primary mx-auto mt-2 max-w-2xl text-[20px] leading-tight font-medium tracking-tight text-balance"
+			class="text-fg-primary mx-auto mt-2 max-w-2xl leading-tight font-medium tracking-tight text-balance text-[var(--text-title)]"
 		>
 			Digitize Mon texts effortlessly. High-precision OCR running right in your browser.
 		</p>
-		<p class="text-fg-muted mx-auto max-w-lg text-[12px] font-medium tracking-wide">
+		<p class="text-fg-muted mx-auto max-w-lg font-medium tracking-wide text-[var(--text-meta)]">
 			Security-First: All processing occurs locally. Requires WebGL/WebGPU acceleration.
 		</p>
 
@@ -295,7 +295,7 @@
 		{#if !file}
 			<div in:fade={{ duration: 150 }}>
 				<div
-					class="hover:bg-canvas-subtle group border-border relative flex flex-col items-center justify-center rounded-[var(--radius-huge)] border py-6 transition-all duration-150"
+					class="hover:bg-canvas-subtle group border-border relative flex flex-col items-center justify-center rounded-[var(--radius-huge)] border py-4 transition-all duration-150"
 					ondragover={handleDragOver}
 					ondragleave={handleDragLeave}
 					ondrop={handleDrop}
@@ -327,7 +327,7 @@
 							<h3 class="text-fg-primary text-base font-semibold tracking-tight">
 								Drop an image or PDF here
 							</h3>
-							<p class="text-fg-muted text-[13px] font-medium tracking-wide">
+							<p class="text-fg-muted font-medium tracking-wide text-[var(--text-meta)]">
 								Secure local processing
 							</p>
 						</div>
@@ -345,7 +345,7 @@
 					</div>
 					<button
 						onclick={reset}
-						class="text-fg-secondary hover:text-fg-primary hover:bg-canvas-subtle border-border bg-canvas flex min-h-[32px] items-center gap-2 rounded-lg border px-3 py-1 text-[11px] font-bold tracking-wider uppercase transition-all"
+						class="text-fg-secondary hover:text-fg-primary hover:bg-canvas-subtle border-border bg-canvas flex min-h-[30px] items-center gap-2 rounded-lg border px-3 py-1 text-[11px] font-medium tracking-wide uppercase transition-all"
 						aria-label="Process another image or PDF"
 					>
 						Try another one
@@ -354,23 +354,27 @@
 
 				<!-- Result -->
 				<div
-					class="border-border bg-canvas animate-fade-in-up flex min-h-[250px] flex-col overflow-hidden rounded-xl border shadow-sm"
+					class="border-border bg-canvas animate-fade-in-up ring-border/20 flex min-h-[250px] flex-col overflow-hidden rounded-xl border shadow-sm ring-1 transition-all duration-300"
 				>
 					<div
-						class="border-border bg-canvas-subtle flex items-center justify-between border-b px-5 py-3"
+						class="border-border bg-canvas-subtle flex items-center justify-between border-b px-5 py-2.5"
 					>
-						<h2 class="section-label mb-0">Extracted Text</h2>
+						<h2 class="section-label mb-0 tracking-[0.4em] text-[var(--text-meta)]">
+							Extracted Text
+						</h2>
 						{#if processingTime > 0 && !loading && resultText}
-							<div class="text-fg-secondary flex items-center gap-3 font-mono text-xs">
+							<div
+								class="text-fg-secondary flex items-center gap-2.5 font-mono text-[var(--text-meta)] opacity-80"
+							>
 								<span
 									>{resultText
 										.trim()
 										.split(/\s+/)
-										.filter((w) => w.length > 0).length} words</span
+										.filter((w) => w.length > 0).length} w</span
 								>
-								<span class="opacity-50">•</span>
-								<span>{resultText.length} chars</span>
-								<span class="opacity-50">•</span>
+								<span class="opacity-30">•</span>
+								<span>{resultText.length} ch</span>
+								<span class="opacity-30">•</span>
 								<span>{processingTime}ms</span>
 							</div>
 						{/if}
@@ -385,7 +389,7 @@
 									<div
 										class="border-primary-500 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"
 									></div>
-									<span class="text-fg-secondary animate-pulse text-sm font-medium">
+									<span class="text-fg-secondary animate-pulse font-medium text-[var(--text-body)]">
 										Scanning document...
 									</span>
 								</div>
@@ -395,7 +399,7 @@
 						{#if resultText}
 							<div class="prose max-w-none dark:prose-invert">
 								<p
-									class="font-mon text-fg-primary text-base leading-relaxed break-words whitespace-pre-wrap"
+									class="font-mon text-fg-primary leading-relaxed break-words whitespace-pre-wrap text-[var(--text-body)]"
 								>
 									{resultText}
 								</p>
@@ -409,7 +413,9 @@
 								<div class="bg-border h-3 w-3/4 animate-pulse rounded-full"></div>
 							</div>
 						{:else}
-							<div class="text-fg-secondary flex h-full items-center justify-center text-sm italic">
+							<div
+								class="text-fg-secondary flex h-full items-center justify-center text-[var(--text-body)] italic"
+							>
 								No text extracted
 							</div>
 						{/if}

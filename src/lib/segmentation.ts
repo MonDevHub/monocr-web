@@ -37,7 +37,7 @@ export function segmentLines(
 	const binaryData = new Uint8Array(width * height);
 	const windowSize = 25;
 	const C = 8; // Lowered from 10 to capture faint low-contrast ink and thin strokes
-	const integral = new Uint32Array(width * height);
+	const integral = new Float64Array(width * height);
 
 	for (let y = 0; y < height; y++) {
 		let rowSum = 0;
@@ -188,16 +188,17 @@ export function segmentLines(
 
 		if (found) {
 			const coreH = eY - sY;
-			// Myanmar/Mon Specific Padding Rules:
-			// Add 20% vertical padding above and below glyph clusters.
-			// Add 15% horizontal padding (using cluster height to bound massive widths).
-			const padY = Math.ceil(coreH * 0.2);
-			const padX = Math.ceil(coreH * 0.15);
+			// iOS-aligned padding for Mon/Myanmar script:
+			// 25% vertical captures ascenders, descenders, and floating vowel marks;
+			// 20% horizontal prevents narrow glyphs from being clipped at edges.
+			const padY = Math.ceil(coreH * 0.25);
+			const padX = Math.ceil(coreH * 0.2);
 
-			const x1 = Math.max(0, minX - padX);
-			const x2 = Math.min(width, maxX + padX);
-			const y1 = Math.max(0, sY - padY);
-			const y2 = Math.min(height, eY + padY);
+			const x1 = Math.max(0, Math.floor(minX - padX));
+			const x2 = Math.min(width, Math.ceil(maxX + padX));
+			const y1 = Math.max(0, Math.floor(sY - padY));
+			const y2 = Math.min(height, Math.ceil(eY + padY));
+
 
 			segments.push({
 				x: x1,
