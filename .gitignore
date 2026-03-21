@@ -145,3 +145,11 @@ build/
 # System Files
 .DS_Store
 Thumbs.db
+
+# Agent related
+.gemini/
+.agents/
+.agent/
+_agents/
+_agent/
+brain/

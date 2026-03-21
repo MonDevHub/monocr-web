@@ -6,6 +6,7 @@ import { segmentLines } from './segmentation';
  * ONNX Runtime Web-based OCR engine for Mon language.
  * Supports WebGPU (fastest), WASM with SIMD, and WASM fallback.
  */
+export const MODEL_VERSION = '2026.03.21.v1'; // Constitution Aligned
 export class MonOcrOnnx {
 	private session: ort.InferenceSession | null = null;
 	private charset: string = '';
@@ -159,7 +160,8 @@ export class MonOcrOnnx {
 	 * Warm-up the model with a dummy input to trigger JIT compilation.
 	 */
 	private async warmup(): Promise<void> {
-		const dummyData = new Float32Array(1 * 1 * this.TARGET_HEIGHT * this.TARGET_WIDTH).fill(0);
+		const dummyData = new Float32Array(1 * 1 * this.TARGET_HEIGHT * this.TARGET_WIDTH).fill(1.0);
+
 		const dummyTensor = new ort.Tensor('float32', dummyData, [
 			1,
 			1,
@@ -194,11 +196,16 @@ export class MonOcrOnnx {
 	): Promise<Float32Array> {
 		// Calculate scaled dimensions
 		const scale = this.TARGET_HEIGHT / sh;
-		const scaledWidth = Math.min(Math.round(sw * scale), this.TARGET_WIDTH);
+		// Senior Tip: Use Math.floor to match Android/Python integer scaling
+		const scaledWidth = Math.min(Math.floor(sw * scale), this.TARGET_WIDTH);
 
 		// Use OffscreenCanvas
 		const canvas = new OffscreenCanvas(this.TARGET_WIDTH, this.TARGET_HEIGHT);
 		const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+		
+		// Senior Tip: Enforce high-quality smoothing for best OCR upscale
+		ctx.imageSmoothingEnabled = true;
+		ctx.imageSmoothingQuality = 'high';
 
 		// Fill with white background
 		ctx.fillStyle = 'white';
@@ -206,18 +213,80 @@ export class MonOcrOnnx {
 
 		// Draw cropped and scaled image
 		// drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
-		ctx.drawImage(source, sx, sy, sw, sh, 0, 0, scaledWidth, this.TARGET_HEIGHT);
+		// Senior Tip: Floor coordinates to prevent sub-pixel blurring/artifacts
+		ctx.drawImage(
+			source,
+			Math.floor(sx),
+			Math.floor(sy),
+			Math.floor(sw),
+			Math.floor(sh),
+			0,
+			0,
+			scaledWidth,
+			this.TARGET_HEIGHT
+		);
+
 
 		const { data } = ctx.getImageData(0, 0, this.TARGET_WIDTH, this.TARGET_HEIGHT);
 
-		// Convert to grayscale and normalize
-		const float32Data = new Float32Array(this.TARGET_WIDTH * this.TARGET_HEIGHT);
-		for (let i = 0; i < float32Data.length; i++) {
+		// Convert to grayscale
+		const grayscale = new Float32Array(this.TARGET_WIDTH * this.TARGET_HEIGHT);
+		let sumGray = 0;
+		let activeCount = 0;
+		for (let i = 0; i < grayscale.length; i++) {
 			const offset = i * 4;
 			const r = data[offset];
 			const g = data[offset + 1];
 			const b = data[offset + 2];
-			const gray = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+			const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+			grayscale[i] = gray;
+			// Only sample active (non-padded) region for mean luminance
+			if (i % this.TARGET_WIDTH < scaledWidth) {
+				sumGray += gray;
+				activeCount++;
+			}
+		}
+
+		// Adaptive inversion: if the active region is predominantly dark (mean < 120),
+		// assume light text on dark background and invert so the model sees dark on white.
+		// This matches monocr-ios and monocr-android behaviour.
+		const meanGray = activeCount > 0 ? sumGray / activeCount : 255;
+		const shouldInvert = meanGray < 120;
+
+		// Apply inversion first so contrast stretching works in the correct direction
+		if (shouldInvert) {
+			for (let i = 0; i < grayscale.length; i++) {
+				if (i % this.TARGET_WIDTH < scaledWidth) {
+					grayscale[i] = 255 - grayscale[i];
+				}
+			}
+		}
+
+		// Contrast stretching: linearly scale the active-region luminance to [0,255].
+		// Recovers faint Mon strokes (thin vowel marks, stacked consonants) that
+		// would otherwise produce near-zero model activations.
+		let minG = 255;
+		let maxG = 0;
+		for (let i = 0; i < grayscale.length; i++) {
+			if (i % this.TARGET_WIDTH < scaledWidth) {
+				if (grayscale[i] < minG) minG = grayscale[i];
+				if (grayscale[i] > maxG) maxG = grayscale[i];
+			}
+		}
+		const rangeG = maxG - minG;
+		// Only stretch when there's meaningful dynamic range (>30) to avoid
+		// amplifying uniform blank regions into pure noise.
+		const applyStretch = rangeG > 30;
+		const stretchScale = applyStretch ? 255 / rangeG : 1;
+		const stretchOffset = applyStretch ? minG : 0;
+
+		const float32Data = new Float32Array(this.TARGET_WIDTH * this.TARGET_HEIGHT);
+		for (let i = 0; i < float32Data.length; i++) {
+			const x = i % this.TARGET_WIDTH;
+			let gray = grayscale[i];
+			if (x < scaledWidth && applyStretch) {
+				gray = (gray - stretchOffset) * stretchScale;
+			}
 			float32Data[i] = gray / 127.5 - 1.0;
 		}
 
@@ -282,7 +351,14 @@ export class MonOcrOnnx {
 		// We MUST use a canvas to get ImageData (pixels)
 		const segCanvas = new OffscreenCanvas(fullBitmap.width, fullBitmap.height);
 		const segCtx = segCanvas.getContext('2d', { willReadFrequently: true })!;
+		
+		// Senior Tip: Fill with white to ensure transparent PNGs/WebPs 
+		// segment correctly (against white background)
+		segCtx.fillStyle = 'white';
+		segCtx.fillRect(0, 0, segCanvas.width, segCanvas.height);
+		
 		segCtx.drawImage(fullBitmap, 0, 0);
+
 		const imageData = segCtx.getImageData(0, 0, fullBitmap.width, fullBitmap.height);
 
 		// 3. Segment Lines

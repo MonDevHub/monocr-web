@@ -54,21 +54,23 @@
 <div class="font-public-sans text-fg-primary">
 	<div class="flex">
 		<!-- Left Sidebar Navigation -->
-		<aside class="border-border hidden w-64 shrink-0 border-r px-5 py-8 lg:block">
+		<aside class="border-border hidden w-64 shrink-0 border-r px-4 py-8 lg:block">
 			<div class="sticky top-24 flex flex-col gap-8">
 				<div>
-					<h3 class="text-fg-muted mb-4 px-3 text-[11px] font-bold tracking-[0.2em] uppercase">
+					<h3
+						class="text-fg-muted mb-4 px-3 font-bold tracking-[0.2em] text-[var(--text-meta)] uppercase"
+					>
 						Core Concepts
 					</h3>
 					<nav class="flex flex-col gap-1">
 						<a
-							class="hover:bg-canvas-subtle flex items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-all active:scale-[0.98]"
+							class="hover:bg-canvas-subtle flex items-center gap-3 rounded-lg px-4 py-3 font-medium text-[var(--text-body)] transition-all active:scale-[0.98]"
 							href="#introduction"
 						>
 							<span class="material-symbols-outlined text-[18px] opacity-70">info</span> Introduction
 						</a>
 						<a
-							class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-all active:scale-[0.95] {activeSection ===
+							class="flex items-center gap-3 rounded-lg px-4 py-3 font-medium text-[var(--text-body)] transition-all active:scale-[0.95] {activeSection ===
 							'getting-started'
 								? 'bg-canvas-subtle text-fg-primary'
 								: 'text-fg-secondary hover:bg-canvas-subtle/50 hover:text-fg-primary'}"
@@ -81,20 +83,20 @@
 							> Getting Started
 						</a>
 						<a
-							class="hover:bg-canvas-subtle flex items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-all active:scale-[0.98]"
+							class="hover:bg-canvas-subtle flex items-center gap-3 rounded-lg px-4 py-3 font-medium text-[var(--text-body)] transition-all active:scale-[0.98]"
 							href="#image-quality"
 						>
 							<span class="material-symbols-outlined text-[18px] opacity-70">high_quality</span> Quality
 							Standards
 						</a>
 						<a
-							class="hover:bg-canvas-subtle flex items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-all active:scale-[0.98]"
+							class="hover:bg-canvas-subtle flex items-center gap-3 rounded-lg px-4 py-3 font-medium text-[var(--text-body)] transition-all active:scale-[0.98]"
 							href="/report"
 						>
 							<span class="material-symbols-outlined text-[18px] opacity-70">edit_note</span> Feedback
 						</a>
 						<a
-							class="hover:bg-canvas-subtle flex items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-all active:scale-[0.98]"
+							class="hover:bg-canvas-subtle flex items-center gap-3 rounded-lg px-4 py-3 font-medium text-[var(--text-body)] transition-all active:scale-[0.98]"
 							href="/contribute"
 						>
 							<span class="material-symbols-outlined text-[18px] opacity-70"
@@ -146,7 +148,7 @@
 		</aside>
 
 		<!-- Main Page Flow -->
-		<main id="main-content" class="min-w-0 flex-1 px-4 py-12 sm:px-6 lg:px-12 xl:px-20">
+		<main id="main-content" class="min-w-0 flex-1 px-4 py-12 sm:px-6 lg:px-12 xl:px-16">
 			<div class="mx-auto flex max-w-7xl flex-col gap-12 xl:flex-row">
 				<!-- Article Content -->
 				<div class="min-w-0 flex-1 xl:max-w-4xl">
@@ -158,8 +160,8 @@
 					</nav>
 
 					<section id="introduction" class="mb-10">
-						<h1 class="mb-3 text-2xl font-bold tracking-tight">Documentation</h1>
-						<p class="text-fg-muted text-base leading-relaxed">
+						<h1 class="mb-3 font-bold tracking-tight text-[var(--text-title)]">Documentation</h1>
+						<p class="text-fg-muted leading-relaxed text-[var(--text-section)]">
 							Academic-grade OCR engine for Mon script. High-performance, private, and localized.
 						</p>
 					</section>
@@ -179,7 +181,7 @@
 						</p>
 						<div class="group relative">
 							<pre
-								class="border-border bg-canvas-subtle text-fg-primary overflow-x-auto rounded-xl border p-5 font-mono text-xs">pip install monocr</pre>
+								class="border-border bg-canvas-subtle text-fg-primary overflow-x-auto rounded-xl border p-4 font-mono text-[var(--text-meta)]">pip install monocr</pre>
 							<button
 								class="hover:text-primary text-fg-muted hover:bg-canvas/50 absolute top-3 right-3 rounded-md p-2 opacity-40 transition-opacity hover:opacity-100"
 								aria-label="Copy to clipboard"
@@ -299,7 +301,7 @@ print(text)</pre>
 					<section id="heritage" class="mb-24 scroll-mt-24">
 						<h3 class="section-label">Preserving Mon Heritage</h3>
 						<div class="prose prose-sm max-w-none space-y-4 dark:prose-invert">
-							<p class="text-fg-muted leading-relaxed font-medium">
+							<p class="text-fg-muted leading-relaxed font-medium text-[var(--text-body)]">
 								Mon (mnw) is a vulnerable language with limited digital presence. Most written
 								knowledge remains locked in analog scans, making it difficult to build modern
 								digital tools.

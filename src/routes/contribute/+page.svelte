@@ -54,10 +54,10 @@
 	<main id="main-content" class="flex-1 overflow-y-auto pb-6">
 		<div class="mx-auto max-w-2xl px-6 py-1">
 			<header class="mb-4 text-center">
-				<h2 class="text-fg-primary mb-1 text-base font-semibold tracking-tight">
+				<h2 class="text-fg-primary mb-1 font-semibold tracking-tight text-[var(--text-section)]">
 					Preserve Our Heritage
 				</h2>
-				<p class="text-fg-muted text-[12px] font-medium tracking-wide">
+				<p class="text-fg-muted font-medium tracking-wide text-[var(--text-meta)]">
 					Contribute Mon documents to improve recognition accuracy.
 				</p>
 			</header>
@@ -89,7 +89,7 @@
 							</span>
 						</div>
 						<div class="space-y-1">
-							<h3 class="text-fg-primary text-[13px] font-semibold tracking-tight">
+							<h3 class="text-fg-primary font-semibold tracking-tight text-[var(--text-secondary)]">
 								{sourceFile ? sourceFile.name : 'Upload Mon Documents'}
 							</h3>
 						</div>
@@ -112,7 +112,7 @@
 				<div class="relative">
 					<textarea
 						bind:value={transcription}
-						class="focus:ring-primary/5 focus:border-primary/20 font-mon border-border bg-canvas placeholder:text-fg-muted/30 w-full resize-y rounded-md border p-3 text-[14px] leading-relaxed transition-all duration-150 placeholder:text-[11px] focus:ring-4"
+						class="focus:ring-primary/5 focus:border-primary/20 font-mon border-border bg-canvas placeholder:text-fg-muted/30 w-full resize-y rounded-md border p-3 leading-relaxed text-[var(--text-body)] transition-all duration-150 placeholder:text-[var(--text-meta)] focus:ring-4"
 						placeholder="Example: မန်ဒိုင် (Type or paste the Mon script here)..."
 					></textarea>
 				</div>

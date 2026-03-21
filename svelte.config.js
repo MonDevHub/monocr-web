@@ -18,7 +18,7 @@ const config = {
 		prerender: {
 			handleHttpError: 'warn',
 			handleMissingId: 'warn',
-			entries: ['/', '/about', '/docs']
+			entries: ['/', '/docs']
 		}
 	}
 };

@@ -14,7 +14,6 @@
 		--space-2: 0.5rem; /* 8px */
 		--space-3: 0.75rem; /* 12px */
 		--space-4: 1rem; /* 16px */
-		--space-5: 1.25rem; /* 20px */
 		--space-6: 1.5rem; /* 24px */
 		--space-8: 2rem; /* 32px */
 		--space-10: 2.5rem; /* 40px */
@@ -103,6 +102,13 @@
 	/* Transition tokens - "Immediate but invisible" */
 	--transition-fast: 100ms;
 	--transition-base: 150ms;
+
+	/* Typography Constitution (20, 16, 14, 13, 12) */
+	--text-title: 1.25rem; /* 20px */
+	--text-section: 1rem; /* 16px */
+	--text-body: 0.875rem; /* 14px */
+	--text-secondary: 0.8125rem; /* 13px */
+	--text-meta: 0.75rem; /* 12px */
 }
 
 @layer utilities {
