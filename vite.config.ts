@@ -63,9 +63,7 @@ export default defineConfig({
 							},
 							cacheableResponse: {
 								statuses: [0, 200]
-							},
-							// Handle Range requests if ONNX Runtime uses them
-							rangeRequests: true
+							}
 						}
 					},
 					{
@@ -81,8 +79,7 @@ export default defineConfig({
 							},
 							cacheableResponse: {
 								statuses: [0, 200]
-							},
-							rangeRequests: true
+							}
 						}
 					},
 					{
@@ -100,8 +97,7 @@ export default defineConfig({
 							},
 							cacheableResponse: {
 								statuses: [0, 200]
-							},
-							rangeRequests: true
+							}
 						}
 					},
 					{
@@ -117,13 +113,12 @@ export default defineConfig({
 							},
 							cacheableResponse: {
 								statuses: [0, 200]
-							},
-							rangeRequests: true
+							}
 						}
 					},
 					{
 						urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-						handler: 'CacheFirst',
+						handler: 'StaleWhileRevalidate',
 						options: {
 							cacheName: 'google-fonts-cache',
 							expiration: {

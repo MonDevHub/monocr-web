@@ -24,7 +24,6 @@ export async function renderPdfPage(
 	pageNumber: number = 1,
 	scale: number = 4.16 // Senior Tip: 300 DPI (4.16) for optimal OCR accuracy
 ): Promise<PdfPageResult> {
-
 	let pdf: pdfjs.PDFDocumentProxy;
 
 	if ('numPages' in pdfInput) {
@@ -58,7 +57,6 @@ export async function renderPdfPage(
 	context.fillRect(0, 0, canvas.width, canvas.height);
 
 	const renderContext = {
-
 		canvasContext: context,
 		viewport: viewport
 	};

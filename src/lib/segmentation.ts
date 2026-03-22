@@ -199,7 +199,6 @@ export function segmentLines(
 			const y1 = Math.max(0, Math.floor(sY - padY));
 			const y2 = Math.min(height, Math.ceil(eY + padY));
 
-
 			segments.push({
 				x: x1,
 				y: y1,
