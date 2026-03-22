@@ -33,16 +33,37 @@ export function segmentLines(
 		grayData[i] = 0.299 * r + 0.587 * g + 0.114 * b;
 	}
 
-	// 2. Adaptive Binarization (Integral Image)
+	// 1b. Smooth Grayscale (3x3 Box Blur)
+	const smoothedGray = new Uint8Array(width * height);
+	for (let y = 0; y < height; y++) {
+		for (let x = 0; x < width; x++) {
+			let sum = 0;
+			let count = 0;
+			for (let ky = -1; ky <= 1; ky++) {
+				for (let kx = -1; kx <= 1; kx++) {
+					const ny = y + ky;
+					const nx = x + kx;
+					if (ny >= 0 && ny < height && nx >= 0 && nx < width) {
+						sum += grayData[ny * width + nx];
+						count++;
+					}
+				}
+			}
+			smoothedGray[y * width + x] = sum / count;
+		}
+	}
+	const activeGray = smoothedGray;
+
+	// 2. Adaptive Binarization (Integral Image) using smoothed buffer
 	const binaryData = new Uint8Array(width * height);
 	const windowSize = 25;
-	const C = 8; // Lowered from 10 to capture faint low-contrast ink and thin strokes
+	const C = 8;
 	const integral = new Float64Array(width * height);
 
 	for (let y = 0; y < height; y++) {
 		let rowSum = 0;
 		for (let x = 0; x < width; x++) {
-			rowSum += grayData[y * width + x];
+			rowSum += activeGray[y * width + x];
 			if (y === 0) {
 				integral[y * width + x] = rowSum;
 			} else {
