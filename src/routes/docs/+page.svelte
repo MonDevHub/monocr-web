@@ -121,6 +121,15 @@
 						>
 							<span class="material-symbols-outlined text-lg">code</span> Multi-Language SDKs
 						</a>
+						<a
+							class="hover:bg-canvas-subtle flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium transition-colors {activeSection ===
+							'cli-reference'
+								? 'bg-primary/10 text-primary font-bold'
+								: ''}"
+							href="#cli-reference"
+						>
+							<span class="material-symbols-outlined text-lg">terminal</span> CLI Reference
+						</a>
 					</nav>
 				</div>
 
@@ -351,6 +360,41 @@ print(text)</pre>
 						</div>
 					</section>
 
+					<section id="cli-reference" class="mb-24 scroll-mt-24">
+						<header class="mb-8">
+							<h1 class="mb-3 text-2xl font-bold tracking-tight">CLI Reference</h1>
+							<p class="text-fg-muted text-base leading-relaxed">
+								Use the command line interface for processing large PDFs (>50MB) or batch folders.
+							</p>
+						</header>
+
+						<div class="space-y-8">
+							<div class="space-y-3">
+								<h3 class="text-sm font-bold tracking-wider uppercase">Installation</h3>
+								<pre
+									class="border-border bg-canvas-subtle overflow-x-auto rounded-xl border p-5 font-mono text-xs">pip install monocr</pre>
+							</div>
+
+							<div class="space-y-3">
+								<h3 class="text-sm font-bold tracking-wider uppercase">Basic Usage</h3>
+								<div class="grid gap-4">
+									<div class="border-border bg-canvas rounded-lg border p-4">
+										<div class="text-fg-primary mb-2 text-xs font-bold uppercase">Read Image</div>
+										<pre
+											class="bg-canvas-subtle rounded-md p-2 font-mono text-xs">monocr read image.png</pre>
+									</div>
+									<div class="border-border bg-canvas rounded-lg border p-4">
+										<div class="text-fg-primary mb-2 text-xs font-bold uppercase">
+											Batch Processing
+										</div>
+										<pre
+											class="bg-canvas-subtle rounded-md p-2 font-mono text-xs">monocr batch folder_path/</pre>
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+
 					<section id="sdks" class="mb-24 scroll-mt-24">
 						<header class="mb-8">
 							<h1 class="mb-3 text-2xl font-bold tracking-tight">Multi-Platform SDKs</h1>
@@ -536,6 +580,12 @@ let text = ocr.predict("page.jpg")?;</pre>
 									? 'text-primary'
 									: 'text-fg-muted hover:text-fg-primary'}"
 								href="#sdks">Platform SDKs</a
+							>
+							<a
+								class="text-xs font-medium transition-colors {activeSection === 'cli-reference'
+									? 'text-primary'
+									: 'text-fg-muted hover:text-fg-primary'}"
+								href="#cli-reference">CLI Reference</a
 							>
 							<a
 								class="text-xs font-medium transition-colors {activeSection === 'privacy'

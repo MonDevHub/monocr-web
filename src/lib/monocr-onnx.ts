@@ -202,7 +202,7 @@ export class MonOcrOnnx {
 		// Use OffscreenCanvas
 		const canvas = new OffscreenCanvas(this.TARGET_WIDTH, this.TARGET_HEIGHT);
 		const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
-		
+
 		// Senior Tip: Enforce high-quality smoothing for best OCR upscale
 		ctx.imageSmoothingEnabled = true;
 		ctx.imageSmoothingQuality = 'high';
@@ -225,7 +225,6 @@ export class MonOcrOnnx {
 			scaledWidth,
 			this.TARGET_HEIGHT
 		);
-
 
 		const { data } = ctx.getImageData(0, 0, this.TARGET_WIDTH, this.TARGET_HEIGHT);
 
@@ -351,12 +350,12 @@ export class MonOcrOnnx {
 		// We MUST use a canvas to get ImageData (pixels)
 		const segCanvas = new OffscreenCanvas(fullBitmap.width, fullBitmap.height);
 		const segCtx = segCanvas.getContext('2d', { willReadFrequently: true })!;
-		
-		// Senior Tip: Fill with white to ensure transparent PNGs/WebPs 
+
+		// Senior Tip: Fill with white to ensure transparent PNGs/WebPs
 		// segment correctly (against white background)
 		segCtx.fillStyle = 'white';
 		segCtx.fillRect(0, 0, segCanvas.width, segCanvas.height);
-		
+
 		segCtx.drawImage(fullBitmap, 0, 0);
 
 		const imageData = segCtx.getImageData(0, 0, fullBitmap.width, fullBitmap.height);

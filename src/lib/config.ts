@@ -8,7 +8,7 @@ export const CONFIG = {
 		MAX_RETRIES: 3
 	},
 	UI: {
-		MAX_IMAGE_SIZE_MB: 10,
+		MAX_IMAGE_SIZE_MB: 50,
 		ALLOWED_FILE_TYPES: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
 	}
 } as const;

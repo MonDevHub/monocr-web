@@ -80,7 +80,7 @@
 
 		// Validation
 		if (newFile.size > CONFIG.UI.MAX_IMAGE_SIZE_MB * 1024 * 1024) {
-			error = `File too large (Max ${CONFIG.UI.MAX_IMAGE_SIZE_MB}MB)`;
+			error = `File too large (Max ${CONFIG.UI.MAX_IMAGE_SIZE_MB}MB). Use CLI tools or desktop version for bigger file support.`;
 			return;
 		}
 		if (!(CONFIG.UI.ALLOWED_FILE_TYPES as readonly string[]).includes(newFile.type)) {
@@ -253,14 +253,14 @@
 
 <div class="mx-auto w-full max-w-3xl">
 	<!-- Header -->
-	<header class="mb-1 space-y-1 text-center">
+	<header class="mb-8 space-y-4 text-center md:mb-12 md:space-y-6">
 		<p
 			class="text-fg-primary mx-auto mt-2 max-w-2xl leading-tight font-medium tracking-tight text-balance text-[var(--text-title)]"
 		>
 			Digitize Mon texts effortlessly. High-precision OCR running right in your browser.
 		</p>
 		<p class="text-fg-muted mx-auto max-w-lg font-medium tracking-wide text-[var(--text-meta)]">
-			Security-First: All processing occurs locally. Requires WebGL/WebGPU acceleration.
+			Requires WebGL/WebGPU acceleration.
 		</p>
 
 		<div class="flex justify-center pt-2">
@@ -277,6 +277,14 @@
 				>
 					<div class="h-1 w-1 rounded-full bg-current"></div>
 					{error}
+					{#if error.includes('CLI')}
+						<a
+							href="/docs#cli-reference"
+							class="ml-2 border-b border-red-200/50 pb-px font-bold lowercase transition-colors hover:text-red-700 dark:hover:text-red-300"
+						>
+							Learn more
+						</a>
+					{/if}
 				</div>
 			{:else}
 				<div
@@ -291,7 +299,7 @@
 	</header>
 
 	<!-- Main Content -->
-	<main id="main-content" class="space-y-6">
+	<main id="main-content" class="space-y-12 sm:space-y-16">
 		{#if !file}
 			<div in:fade={{ duration: 150 }}>
 				<div
@@ -327,9 +335,6 @@
 							<h3 class="text-fg-primary text-base font-semibold tracking-tight">
 								Drop an image or PDF here
 							</h3>
-							<p class="text-fg-muted font-medium tracking-wide text-[var(--text-meta)]">
-								Secure local processing
-							</p>
 						</div>
 					</div>
 				</div>
