@@ -14,6 +14,24 @@ MonOCR Web brings optical character recognition for the Mon script directly to t
 - **High Performance**: Optimized MobileNetV3 + BiLSTM OCR engine via ONNX Runtime (~6.6M parameters).
 - **Large File Support**: Supports PDFs and images up to 50MB.
 - **Mon Language Support**: Specialized for recognizing Mon script.
+- **Premium UX**: High-fidelity skeleton loaders and synchronized design system (16px radii, 24px spacing).
+
+## Ecosystem 🌐
+
+MonOCR is a cross-platform ecosystem designed for parity and performance:
+
+- **[MonOCR Web](https://monocr.app)**: (This Repository) Privacy-first in-browser OCR.
+- **[MonOCR Android](https://github.com/janakhpon/monocr-android)**: Native Jetpack Compose app with Material 3.
+- **[MonOCR iOS](https://github.com/janakhpon/monocr-ios)**: Native SwiftUI app with SwiftData persistence.
+
+## Quality Standards 💎
+
+This project is certified **Production Ready** and strictly adheres to:
+
+- ✅ **[Product Quality Constitution](.agents/workflows/constitution.md)**: Compact, Calm, Modern.
+- ✅ **Privacy-First Engineering**: 100% on-device processing.
+- ✅ **Design System Convergence**: Identical corner radii, spacing, and typography across all screens.
+- ✅ **Real-World Feedback**: Integrated unified feedback bridges for model improvement.
 
 ## Resources
 

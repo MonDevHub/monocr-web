@@ -44,9 +44,9 @@
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <label
-	class="border-border bg-canvas group relative flex min-h-[44px] cursor-pointer flex-col items-center justify-center rounded-[var(--radius-huge)] border-2 border-dashed p-12 text-center transition-all duration-300 ease-in-out
+	class="border-border bg-canvas group relative flex min-h-[120px] cursor-pointer flex-col items-center justify-center rounded-[var(--radius-huge)] border-2 border-dashed p-6 text-center transition-all duration-300 ease-in-out
            {isDragging
-		? 'scale-[1.01] border-zinc-400 bg-zinc-50 dark:border-zinc-500 dark:bg-zinc-800/20'
+		? 'border-primary-action bg-canvas-subtle scale-[1.01]'
 		: 'hover:bg-canvas-subtle hover:border-fg-secondary'}"
 	on:dragover={handleDragOver}
 	on:dragleave={handleDragLeave}

@@ -44,38 +44,40 @@
 
 		loading = true;
 		try {
-			// Save to history
-			if (sourceFile) {
-				await saveRecord(
-					{
-						fileName: `Feedback: ${sourceFile.name}`,
-						fileType: sourceFile.type,
-						fileData: sourceFile,
-						text: correctedText,
-						processingTime: 0
-					},
-					'feedback'
-				);
-			} else {
-				// Fallback if no file (e.g. from state)
-				await saveRecord(
-					{
-						fileName: `Feedback: ${selectedType}`,
-						fileType: 'text/plain',
-						fileData: new Blob([originalText], { type: 'text/plain' }),
-						text: correctedText,
-						processingTime: 0
-					},
-					'feedback'
-				);
-			}
+			// 1. External Submit: mailto bridge (Reliable, high-trust)
+			const subject = encodeURIComponent(`MonOCR Feedback: [${selectedType}] Accuracy Report`);
+			const body = encodeURIComponent(
+				`MonOCR Accuracy Feedback Report\n` +
+					`------------------------------\n` +
+					`Error Type: ${selectedType}\n` +
+					`Original: "${originalText}"\n` +
+					`Corrected: "${correctedText}"\n\n` +
+					`Platform: Web\n` +
+					`Version: 1.0.0\n\n` +
+					`Submission Date: ${new Date().toLocaleString()}`
+			);
+
+			// Trigger mailto
+			window.location.href = `mailto:monocr-feedback@googlegroups.com?subject=${subject}&body=${body}`;
+
+			// 2. Local Logging: Save to history for user record
+			const fileToSave = sourceFile || new Blob([originalText], { type: 'text/plain' });
+			await saveRecord(
+				{
+					fileName: sourceFile ? `Feedback: ${sourceFile.name}` : `Feedback: ${selectedType}`,
+					fileType: sourceFile ? sourceFile.type : 'text/plain',
+					fileData: fileToSave,
+					text: `[${selectedType}] ${correctedText}`,
+					processingTime: 0
+				},
+				'feedback'
+			);
 
 			// Success
 			showSuccessModal = true;
 			historySection?.refresh();
 		} catch (e) {
 			console.error('Failed to submit feedback:', e);
-			alert('Failed to save feedback history.');
 		} finally {
 			loading = false;
 		}
@@ -139,7 +141,7 @@
 						<div class="flex flex-col gap-4">
 							{#if previewUrl}
 								<div
-									class="border-border bg-canvas-subtle relative aspect-video w-full overflow-hidden rounded border"
+									class="border-border bg-canvas-subtle relative h-[200px] w-full overflow-hidden rounded border"
 								>
 									<img
 										src={previewUrl}

@@ -123,6 +123,16 @@
 			{/each}
 		</div>
 	</section>
+{:else if !loading}
+	<div
+		class="border-border bg-canvas-subtle/40 flex h-32 flex-col items-center justify-center rounded-[var(--radius-huge)] border border-dashed transition-all"
+		in:fade
+	>
+		<div class="bg-primary/5 mb-3 flex h-10 w-10 items-center justify-center rounded-full">
+			<span class="material-symbols-outlined text-primary/40 text-[20px]">history</span>
+		</div>
+		<p class="text-fg-muted font-medium tracking-tight text-[var(--text-meta)]">No recent scans</p>
+	</div>
 {/if}
 
 <!-- Modal View -->
@@ -142,7 +152,12 @@
 
 		<div
 			class="bg-canvas border-border shadow-huge relative flex h-full max-h-[82vh] w-full max-w-4xl flex-col overflow-hidden rounded-[var(--radius-huge)] border"
-			in:fly={{ y: 15, duration: 250, delay: 50 }}
+			in:fly={{
+				y: 20,
+				duration: 400,
+				easing: (t) => 1 - Math.pow(1 - t, 4) /* cubic-out */,
+				delay: 50
+			}}
 		>
 			<div
 				class="border-border bg-canvas-subtle flex items-center justify-between border-b px-5 py-3"

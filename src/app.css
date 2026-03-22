@@ -97,7 +97,7 @@
 	--radius-lg: 4px; /* Standardized */
 	--radius-xl: 4px; /* Standardized */
 	--radius-2xl: 6px;
-	--radius-huge: 8px; /* For cards/dropzones */
+	--radius-huge: 16px; /* For cards/dropzones - Sync'd with mobile 16pt */
 
 	/* Transition tokens - "Immediate but invisible" */
 	--transition-fast: 100ms;
@@ -226,4 +226,24 @@ label {
 
 *::-webkit-scrollbar-thumb:hover {
 	background: color-mix(in srgb, var(--primary) 80%, transparent) !important;
+} /* Performance: Premium Shimmer Effect */
+@keyframes shimmer {
+	0% {
+		background-position: -200% 0;
+	}
+	100% {
+		background-position: 200% 0;
+	}
+}
+
+.shimmer {
+	background: linear-gradient(
+		90deg,
+		rgba(var(--color-border-raw), 0.1) 25%,
+		rgba(var(--color-border-raw), 0.4) 37%,
+		rgba(var(--color-border-raw), 0.1) 63%
+	);
+	background-size: 200% 100%;
+	animation: shimmer 1.5s infinite linear;
+	will-change: background-position;
 }
