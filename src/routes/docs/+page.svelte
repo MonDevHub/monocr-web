@@ -525,18 +525,6 @@ let text = ocr.predict("page.jpg")?;</pre>
 								> Introduction
 							</a>
 						</div>
-						<div class="flex flex-col items-end">
-							<p class="text-fg-muted mb-1 text-xs font-bold uppercase">Next</p>
-							<a
-								class="text-primary group flex items-center gap-1 text-xs font-bold hover:underline"
-								href="#cli"
-							>
-								CLI Reference <span
-									class="material-symbols-outlined text-sm transition-transform group-hover:translate-x-1"
-									>arrow_forward</span
-								>
-							</a>
-						</div>
 					</footer>
 				</div>
 
