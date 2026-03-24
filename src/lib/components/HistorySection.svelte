@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { db, getRecords, deleteRecord, clearHistory, type OCRRecord } from '$lib/storage/db';
-	import { syncService } from '$lib/services/sync-service';
+	import { syncService, syncEvents } from '$lib/services/sync-service';
 	import { ConfirmationModal } from './index';
 
 	interface Props {
@@ -33,6 +33,12 @@
 
 	onMount(() => {
 		loadHistory();
+
+		// Reactive sync: Refresh whenever background synchronization completes
+		const listener = () => loadHistory();
+		syncEvents.addEventListener('synced', listener);
+
+		return () => syncEvents.removeEventListener('synced', listener);
 	});
 
 	// Expose a method to refresh from outside if needed
@@ -81,74 +87,82 @@
 			</button>
 		</div>
 
-		<div class="space-y-2">
+		<div class="space-y-2.5">
 			{#each historyRecords as record (record.id)}
 				<div
-					class="border-border bg-canvas-subtle hover:bg-canvas group relative flex items-center justify-between rounded-[var(--radius-md)] border px-2 py-1 transition-all duration-150 select-none"
+					class="border-border/60 bg-canvas-subtle hover:bg-canvas hover:border-border group relative flex items-center justify-between overflow-hidden rounded-[var(--radius-lg)] border px-4 py-3 transition-all duration-200 select-none hover:shadow-sm"
 				>
-					<div class="flex min-w-0 items-center gap-3">
-						<span class="material-symbols-outlined text-fg-muted text-[16px] opacity-40"
-							>{record.fileType.includes('pdf') ? 'picture_as_pdf' : 'image'}</span
+					<div class="flex min-w-0 items-center gap-4">
+						<!-- Icon Wrapper (Cleaner, no box) -->
+						<div
+							class="flex h-8 w-8 items-center justify-center opacity-40 transition-opacity group-hover:opacity-100"
 						>
-						<div class="flex min-w-0 flex-col">
-							<div class="flex items-baseline gap-2">
-								<span class="text-fg-primary truncate text-[13px] font-medium"
+							<span class="material-symbols-outlined text-fg-primary text-[22px]">
+								{record.fileType.includes('pdf') ? 'description' : 'image'}
+							</span>
+						</div>
+
+						<div class="flex min-w-0 flex-col gap-0.5">
+							<div class="flex items-center gap-2.5">
+								<span class="text-fg-primary truncate text-[13px] font-semibold tracking-tight"
 									>{record.fileName}</span
 								>
-								<span class="text-fg-muted text-[10px] opacity-50"
+								<span class="text-fg-muted text-[10px] whitespace-nowrap opacity-40"
 									>{new Date(record.timestamp).toLocaleDateString()}</span
 								>
 							</div>
-							<div class="mt-0.5 flex items-center gap-1.5">
+
+							<div class="flex items-center gap-2">
 								{#if record.isSynced}
-									<span
-										class="material-symbols-outlined text-[12px] text-emerald-500/60"
-										title="Synced to cloud">cloud_done</span
-									>
-									<span
-										class="text-[9px] font-semibold tracking-wider text-emerald-500/60 uppercase"
-										>Synced</span
-									>
+									<div class="flex items-center gap-1.5 rounded-full bg-emerald-500/5 px-2 py-0.5">
+										<span class="material-symbols-outlined text-[13px] text-emerald-500/80"
+											>check_circle</span
+										>
+										<span class="text-[9px] font-bold tracking-widest text-emerald-500/80 uppercase"
+											>Synced</span
+										>
+									</div>
 								{:else if record.syncError}
-									<span
-										class="material-symbols-outlined text-[12px] text-red-400"
-										title={record.syncError}>cloud_off</span
-									>
-									<span class="text-[9px] font-semibold tracking-wider text-red-400 uppercase"
-										>Sync Failed</span
-									>
+									<div class="flex items-center gap-1.5 rounded-full bg-red-500/5 px-2 py-0.5">
+										<span class="material-symbols-outlined text-[13px] text-red-500/80">error</span>
+										<span class="text-[9px] font-bold tracking-widest text-red-500/80 uppercase"
+											>Failed</span
+										>
+									</div>
 									<button
 										onclick={async (e) => {
 											e.stopPropagation();
-											// Reset attempts to allow retry
 											await db?.records.update(record.id, { syncAttempts: 0 });
 											await syncService.syncAll();
 											await loadHistory();
 										}}
-										class="text-primary ml-2 text-[9px] font-bold tracking-tighter uppercase hover:underline"
+										class="text-primary hover:text-primary/80 ml-1 text-[9px] font-bold tracking-tighter uppercase underline underline-offset-2 opacity-60 transition-opacity hover:opacity-100"
 									>
 										Retry
 									</button>
 								{:else}
-									<span
-										class="material-symbols-outlined text-fg-muted/40 text-[12px]"
-										title="Waiting to sync">cloud_queue</span
-									>
-									<span class="text-fg-muted/40 text-[9px] font-semibold tracking-wider uppercase"
-										>Pending Sync</span
-									>
+									<div class="bg-fg-muted/5 flex items-center gap-1.5 rounded-full px-2 py-0.5">
+										<span
+											class="material-symbols-outlined animate-spin-slow text-fg-muted/40 text-[13px]"
+											>progress_activity</span
+										>
+										<span
+											class="text-fg-muted/50 text-[9px] font-semibold tracking-widest uppercase"
+											>Pending</span
+										>
+									</div>
 								{/if}
 							</div>
 						</div>
 					</div>
 
-					<div class="flex items-center gap-2">
+					<div class="flex items-center gap-1">
 						<button
 							onclick={() => viewRecord(record)}
-							class="text-fg-muted hover:text-primary opacity-20 transition-all group-hover:opacity-100"
+							class="text-fg-muted hover:bg-fg-muted/5 hover:text-fg-primary flex h-9 w-9 items-center justify-center rounded-full opacity-40 transition-all group-hover:opacity-100"
 							aria-label="View record"
 						>
-							<span class="material-symbols-outlined text-[18px]">visibility</span>
+							<span class="material-symbols-outlined text-[20px]">visibility</span>
 						</button>
 						<button
 							onclick={async (e) => {
@@ -156,10 +170,10 @@
 								await deleteRecord(record.id);
 								await loadHistory();
 							}}
-							class="text-fg-muted opacity-20 transition-all group-hover:opacity-100 hover:text-red-500"
+							class="text-fg-muted flex h-9 w-9 items-center justify-center rounded-full opacity-40 transition-all group-hover:opacity-100 hover:bg-red-500/5 hover:text-red-500"
 							aria-label="Delete record"
 						>
-							<span class="material-symbols-outlined text-[18px]">delete</span>
+							<span class="material-symbols-outlined text-[20px]">delete_outline</span>
 						</button>
 					</div>
 				</div>
