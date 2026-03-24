@@ -4,6 +4,8 @@ import { CONFIG } from '$lib/config';
 // Simple delay utility
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
+export const syncEvents = new EventTarget();
+
 export class SyncService {
 	private isSyncing = false;
 
@@ -147,6 +149,7 @@ export class SyncService {
 				});
 			}
 
+			syncEvents.dispatchEvent(new Event('synced'));
 			console.info(`✓ Successfully synced: ${record.fileName}`);
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : String(err);
