@@ -157,8 +157,8 @@
 		</aside>
 
 		<!-- Main Page Flow -->
-		<main id="main-content" class="min-w-0 flex-1 px-4 py-12 sm:px-6 lg:px-12 xl:px-16">
-			<div class="mx-auto flex max-w-7xl flex-col gap-12 xl:flex-row">
+		<main id="main-content" class="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
+			<div class="mx-auto flex max-w-7xl flex-col gap-6 xl:flex-row">
 				<!-- Article Content -->
 				<div class="min-w-0 flex-1 xl:max-w-4xl">
 					<!-- Breadcrumbs -->

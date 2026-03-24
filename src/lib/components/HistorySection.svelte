@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
-	import { getRecords, deleteRecord, clearHistory, type OCRRecord } from '$lib/storage/db';
+	import { db, getRecords, deleteRecord, clearHistory, type OCRRecord } from '$lib/storage/db';
+	import { syncService } from '$lib/services/sync-service';
+	import { ConfirmationModal } from './index';
 
 	interface Props {
 		category?: string;
@@ -16,6 +18,7 @@
 	let modalPreviewUrl = $state<string | null>(null);
 	let loading = $state(false);
 	let copied = $state(false);
+	let showClearModal = $state(false);
 
 	async function loadHistory() {
 		try {
@@ -69,11 +72,8 @@
 				{/if}
 			</h2>
 			<button
-				onclick={async () => {
-					if (confirm('Are you sure you want to permanently delete all scans in this category?')) {
-						await clearHistory(category);
-						await loadHistory();
-					}
+				onclick={() => {
+					showClearModal = true;
 				}}
 				class="text-fg-secondary text-[11px] font-bold tracking-wider uppercase transition-colors hover:text-red-500"
 			>
@@ -84,25 +84,68 @@
 		<div class="space-y-2">
 			{#each historyRecords as record (record.id)}
 				<div
-					class="border-border bg-canvas-subtle hover:bg-canvas group relative flex items-center justify-between rounded-[var(--radius-md)] border px-3 py-1.5 transition-all duration-150 select-none"
+					class="border-border bg-canvas-subtle hover:bg-canvas group relative flex items-center justify-between rounded-[var(--radius-md)] border px-2 py-1 transition-all duration-150 select-none"
 				>
 					<div class="flex min-w-0 items-center gap-3">
 						<span class="material-symbols-outlined text-fg-muted text-[16px] opacity-40"
 							>{record.fileType.includes('pdf') ? 'picture_as_pdf' : 'image'}</span
 						>
-						<div class="flex min-w-0 items-baseline gap-2">
-							<span class="text-fg-primary truncate text-[13px] font-medium">{record.fileName}</span
-							>
-							<span class="text-fg-muted text-[10px] opacity-50"
-								>{new Date(record.timestamp).toLocaleDateString()}</span
-							>
+						<div class="flex min-w-0 flex-col">
+							<div class="flex items-baseline gap-2">
+								<span class="text-fg-primary truncate text-[13px] font-medium"
+									>{record.fileName}</span
+								>
+								<span class="text-fg-muted text-[10px] opacity-50"
+									>{new Date(record.timestamp).toLocaleDateString()}</span
+								>
+							</div>
+							<div class="mt-0.5 flex items-center gap-1.5">
+								{#if record.isSynced}
+									<span
+										class="material-symbols-outlined text-[12px] text-emerald-500/60"
+										title="Synced to cloud">cloud_done</span
+									>
+									<span
+										class="text-[9px] font-semibold tracking-wider text-emerald-500/60 uppercase"
+										>Synced</span
+									>
+								{:else if record.syncError}
+									<span
+										class="material-symbols-outlined text-[12px] text-red-400"
+										title={record.syncError}>cloud_off</span
+									>
+									<span class="text-[9px] font-semibold tracking-wider text-red-400 uppercase"
+										>Sync Failed</span
+									>
+									<button
+										onclick={async (e) => {
+											e.stopPropagation();
+											// Reset attempts to allow retry
+											await db?.records.update(record.id, { syncAttempts: 0 });
+											await syncService.syncAll();
+											await loadHistory();
+										}}
+										class="text-primary ml-2 text-[9px] font-bold tracking-tighter uppercase hover:underline"
+									>
+										Retry
+									</button>
+								{:else}
+									<span
+										class="material-symbols-outlined text-fg-muted/40 text-[12px]"
+										title="Waiting to sync">cloud_queue</span
+									>
+									<span class="text-fg-muted/40 text-[9px] font-semibold tracking-wider uppercase"
+										>Pending Sync</span
+									>
+								{/if}
+							</div>
 						</div>
 					</div>
 
 					<div class="flex items-center gap-2">
 						<button
 							onclick={() => viewRecord(record)}
-							class="text-fg-muted hover:text-primary opacity-0 transition-all group-hover:opacity-100"
+							class="text-fg-muted hover:text-primary opacity-20 transition-all group-hover:opacity-100"
 							aria-label="View record"
 						>
 							<span class="material-symbols-outlined text-[18px]">visibility</span>
@@ -113,7 +156,7 @@
 								await deleteRecord(record.id);
 								await loadHistory();
 							}}
-							class="text-fg-muted opacity-0 transition-all group-hover:opacity-100 hover:text-red-500"
+							class="text-fg-muted opacity-20 transition-all group-hover:opacity-100 hover:text-red-500"
 							aria-label="Delete record"
 						>
 							<span class="material-symbols-outlined text-[18px]">delete</span>
@@ -123,16 +166,25 @@
 			{/each}
 		</div>
 	</section>
-{:else if !loading}
-	<div
-		class="border-border bg-canvas-subtle/40 flex h-32 flex-col items-center justify-center rounded-[var(--radius-huge)] border border-dashed transition-all"
-		in:fade
-	>
-		<div class="bg-primary/5 mb-3 flex h-10 w-10 items-center justify-center rounded-full">
-			<span class="material-symbols-outlined text-primary/40 text-[20px]">history</span>
+{:else if loading}
+	<div class="mt-8 space-y-4">
+		<div class="shimmer h-6 w-32 rounded-md opacity-20"></div>
+		<div class="space-y-2">
+			{#each [1, 2, 3] as i (i)}
+				<div
+					class="border-border bg-canvas-subtle flex h-[52px] items-center gap-3 rounded-[var(--radius-md)] border px-3 py-1.5"
+				>
+					<div class="shimmer h-4 w-4 rounded-full opacity-10"></div>
+					<div class="flex flex-1 flex-col gap-2">
+						<div class="shimmer h-3 w-1/3 rounded-full opacity-10"></div>
+						<div class="shimmer h-2 w-1/4 rounded-full opacity-5"></div>
+					</div>
+				</div>
+			{/each}
 		</div>
-		<p class="text-fg-muted font-medium tracking-tight text-[var(--text-meta)]">No recent scans</p>
 	</div>
+{:else if !loading}
+	<!-- Reclaimed vertical space (collapsed empty state) -->
 {/if}
 
 <!-- Modal View -->
@@ -233,6 +285,22 @@
 		</div>
 	</div>
 {/if}
+
+<ConfirmationModal
+	isOpen={showClearModal}
+	title="Clear History"
+	message="Are you sure you want to permanently delete all scans in this category? This action cannot be undone."
+	confirmLabel="Delete All"
+	cancelLabel="Cancel"
+	onConfirm={async () => {
+		showClearModal = false;
+		await clearHistory(category);
+		await loadHistory();
+	}}
+	onCancel={() => {
+		showClearModal = false;
+	}}
+/>
 
 <style>
 	.font-mon {

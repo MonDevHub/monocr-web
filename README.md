@@ -10,34 +10,36 @@ MonOCR Web brings optical character recognition for the Mon script directly to t
 ## Features
 
 - **Local Processing**: Runs entirely in the browser using WebAssembly.
-- **Privacy First**: No data collection or server-side processing.
+- **Privacy First**: No data collection by default; all OCR processing is 100% local.
+- **Optional Cloud Sync**: Secure, opt-in synchronization for users who wish to contribute their corrected scans to the Mon language dataset.
 - **High Performance**: Optimized MobileNetV3 + BiLSTM OCR engine via ONNX Runtime (~6.6M parameters).
 - **Large File Support**: Supports PDFs and images up to 50MB.
 - **Mon Language Support**: Specialized for recognizing Mon script.
 - **Premium UX**: High-fidelity skeleton loaders and synchronized design system (16px radii, 24px spacing).
 
-## Ecosystem 🌐
+## Ecosystem
 
 MonOCR is a cross-platform ecosystem designed for parity and performance:
 
-- **[MonOCR Web](https://monocr.app)**: (This Repository) Privacy-first in-browser OCR.
+- **[MonOCR Web](https://ocr.mondevhub.com)**: (This Repository) Privacy-first in-browser OCR.
 - **[MonOCR Android](https://github.com/janakhpon/monocr-android)**: Native Jetpack Compose app with Material 3.
 - **[MonOCR iOS](https://github.com/janakhpon/monocr-ios)**: Native SwiftUI app with SwiftData persistence.
 
-## Quality Standards 💎
+## Quality Standards
 
 This project is certified **Production Ready** and strictly adheres to:
 
-- ✅ **[Product Quality Constitution](.agents/workflows/constitution.md)**: Compact, Calm, Modern.
-- ✅ **Privacy-First Engineering**: 100% on-device processing.
-- ✅ **Design System Convergence**: Identical corner radii, spacing, and typography across all screens.
-- ✅ **Real-World Feedback**: Integrated unified feedback bridges for model improvement.
+- [x] Product Quality Constitution: Compact, Calm, Modern.
+- [x] Privacy-First Engineering: 100% on-device processing.
+- [x] Design System Convergence: Identical corner radii, spacing, and typography across all screens.
+- [x] Real-World Feedback: Integrated unified feedback bridges for model improvement.
+- [x] Compliance: Designed for GDPR and CCPA alignment with transparent opt-in data contribution.
 
 ## Resources
 
 ### Models & Data
 
-- [Hugging Face Models](https://huggingface.co/Janakh/monocr) (CKPT, ONNX, TFLite, RTen)
+- [Hugging Face Models](https://huggingface.co/Janakh/monocr) (CKPT, ONNX, ML, RTen)
 
 ### SDKs & Packages
 
@@ -99,6 +101,17 @@ npx wrangler deploy
 ```
 
 (This uses the `wrangler.json` configuration to deploy the `build` folder).
+
+### 4. Cloud Sync Configuration (Optional)
+
+To enable the dataset contribution feature, you must configure the following Cloudflare Environment Variables:
+
+- `R2_ACCESS_KEY_ID`: Cloudflare R2 Access Key.
+- `R2_SECRET_ACCESS_KEY`: Cloudflare R2 Secret Key.
+- `R2_ACCOUNT_ID`: Your Cloudflare Account ID.
+- `R2_BUCKET_NAME`: The name of your R2 bucket (default: `monocr-dataset`).
+
+These can be set in the **Cloudflare Pages Dashboard** under `Settings > Functions > Variables`.
 
 ## License
 

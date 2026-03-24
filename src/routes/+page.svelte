@@ -70,7 +70,10 @@
 
 	onDestroy(() => {
 		cleanup();
-		if (previewUrl) URL.revokeObjectURL(previewUrl);
+		// Only revoke if we aren't heading to the report page
+		if (previewUrl && !window.location.pathname.includes('/report')) {
+			URL.revokeObjectURL(previewUrl);
+		}
 	});
 
 	async function handleFile(e: CustomEvent<File>) {
@@ -159,8 +162,10 @@
 						text: resultText,
 						processingTime
 					},
-					'ocr-scan'
+					'ocr-scan',
+					false
 				);
+
 				await loadHistory();
 			}
 		} catch (err: unknown) {
@@ -198,8 +203,10 @@
 					text,
 					processingTime
 				},
-				'ocr-scan'
+				'ocr-scan',
+				false
 			);
+
 			await loadHistory();
 		} catch (e: unknown) {
 			console.error(e);
@@ -262,9 +269,9 @@
 
 <div class="mx-auto w-full max-w-3xl">
 	<!-- Header -->
-	<header class="mb-8 space-y-4 text-center md:mb-12 md:space-y-6">
+	<header class="mb-6 space-y-2 text-center md:mb-10 md:space-y-4">
 		<p
-			class="text-fg-primary mx-auto mt-2 max-w-2xl leading-tight font-medium tracking-tight text-balance text-[var(--text-title)]"
+			class="text-fg-primary mx-auto mt-2 max-w-xl text-[18px] leading-snug font-medium tracking-tight text-balance sm:text-[20px] md:text-[var(--text-title)]"
 		>
 			Digitize Mon texts effortlessly. High-precision OCR running right in your browser.
 		</p>
@@ -431,12 +438,6 @@
 								<div class="shimmer h-3 w-4/5 rounded-full"></div>
 								<div class="shimmer h-3 w-full rounded-full"></div>
 								<div class="shimmer h-3 w-3/4 rounded-full"></div>
-							</div>
-						{:else}
-							<div
-								class="text-fg-secondary flex h-full items-center justify-center text-[var(--text-body)] italic"
-							>
-								{m.main_no_text()}
 							</div>
 						{/if}
 					</div>

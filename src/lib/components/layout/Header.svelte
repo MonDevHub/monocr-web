@@ -101,8 +101,8 @@
 	class:bg-opacity-90={isScrolled}
 	class:dark:bg-opacity-90={isScrolled}
 	class:backdrop-blur-md={isScrolled}
-	class:py-3={isScrolled}
-	class:py-6={!isScrolled}
+	class:py-2={isScrolled}
+	class:py-3={!isScrolled}
 >
 	<div class="mx-auto flex items-baseline justify-between px-6 sm:px-8 lg:px-8">
 		<!-- Mobile Toggle -->
@@ -126,7 +126,7 @@
 		</button>
 
 		<!-- Desktop Nav -->
-		<nav class="ml-auto hidden items-center space-x-6 md:flex" aria-label="Main navigation">
+		<nav class="ml-auto hidden items-center space-x-4 md:flex" aria-label="Main navigation">
 			<a
 				class="text-[14px] font-medium transition-all duration-200 focus:outline-none active:scale-95 {$page
 					.url.pathname === '/'
@@ -173,7 +173,7 @@
 				{m.nav_privacy()}
 			</a>
 
-			<div class="border-border flex items-center space-x-4 border-l pl-6">
+			<div class="border-border flex items-center space-x-3 border-l pl-4">
 				<LanguageToggle />
 				<ThemeToggle />
 			</div>
@@ -196,7 +196,7 @@
 
 <!-- Mobile Sidebar -->
 <aside
-	class="bg-canvas/80 border-border fixed top-0 left-0 z-[70] h-full w-64 transform border-r shadow-2xl backdrop-blur-xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:hidden"
+	class="bg-canvas border-border fixed top-0 left-0 z-[70] h-full w-64 transform border-r shadow-md transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:hidden"
 	class:translate-x-0={isSidebarOpen}
 	class:-translate-x-full={!isSidebarOpen}
 	aria-hidden={!isSidebarOpen}
