@@ -48,7 +48,10 @@ export default defineConfig({
 				dir: 'ltr'
 			},
 			workbox: {
-				globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,avif,jpg,jpeg,json,woff,woff2}'],
+				globPatterns: [
+					'client/**/*.{js,css,ico,png,svg,webp,avif,jpg,jpeg,json,woff,woff2}',
+					'prerendered/**/*.{html,json}'
+				],
 				globIgnores: ['**/node_modules/**/*', '**/.git/**/*'],
 				maximumFileSizeToCacheInBytes: 100 * 1024 * 1024, // 100 MB for WASM files
 				runtimeCaching: [
