@@ -1,12 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import {
-	R2_ACCESS_KEY_ID as ENV_ID,
-	R2_SECRET_ACCESS_KEY as ENV_SECRET,
-	R2_ACCOUNT_ID as ENV_ACCOUNT,
-	R2_BUCKET_NAME as ENV_BUCKET
-} from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import type { RequestHandler } from './$types';
 
 // Cache S3 client instance to reuse connections
@@ -57,10 +52,10 @@ export const GET: RequestHandler = async ({ url, platform, request }) => {
 	// Environment variables - Check platform.env (Cloudflare) or fallback to static env
 	const platformEnv = (platform as { env?: Record<string, string> })?.env || {};
 
-	const finalId = platformEnv.R2_ACCESS_KEY_ID || ENV_ID;
-	const finalSecret = platformEnv.R2_SECRET_ACCESS_KEY || ENV_SECRET;
-	const finalAccount = platformEnv.R2_ACCOUNT_ID || ENV_ACCOUNT;
-	const finalBucket = platformEnv.R2_BUCKET_NAME || ENV_BUCKET || 'monocr';
+	const finalId = platformEnv.R2_ACCESS_KEY_ID || env.R2_ACCESS_KEY_ID;
+	const finalSecret = platformEnv.R2_SECRET_ACCESS_KEY || env.R2_SECRET_ACCESS_KEY;
+	const finalAccount = platformEnv.R2_ACCOUNT_ID || env.R2_ACCOUNT_ID;
+	const finalBucket = platformEnv.R2_BUCKET_NAME || env.R2_BUCKET_NAME || 'monocr';
 
 	if (!finalId || !finalSecret || !finalAccount) {
 		console.error('R2 Credentials missing in environment');
