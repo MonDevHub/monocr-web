@@ -10,6 +10,11 @@ export const CONFIG = {
 	UI: {
 		MAX_IMAGE_SIZE_MB: 50,
 		ALLOWED_FILE_TYPES: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
+	},
+	SYNC: {
+		MAX_RETRIES: 3,
+		BATCH_DELAY_MS: 1000,
+		ALLOWED_MIME_TYPES: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf', 'text/plain']
 	}
 } as const;
 

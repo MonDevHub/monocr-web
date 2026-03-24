@@ -3,73 +3,85 @@
 
 <svelte:head>
 	<title>Privacy Policy - MonOCR</title>
-	<meta name="description" content="MonOCR Privacy Policy - Zero Data Collection" />
+	<meta name="description" content="MonOCR Privacy - 100% Local, 100% Private" />
 </svelte:head>
 
-<div class="text-fg-primary mx-auto max-w-3xl px-6 py-12">
-	<h1 class="mb-6 font-bold text-[var(--text-title)]">Privacy Policy</h1>
-	<p class="text-fg-muted mb-8 text-[var(--text-meta)]">Effective Date: March 21, 2026</p>
+<div class="mx-auto max-w-3xl px-4 py-8">
+	<!-- Hero Section -->
+	<header class="mb-8">
+		<h1 class="text-fg-primary mb-2 text-2xl font-bold tracking-tight">Privacy Policy</h1>
+		<p class="text-fg-secondary text-[13px] leading-relaxed">
+			MonOCR is built on a foundation of local-first privacy. We reject cloud-based surveillance and
+			ensure your data remains under your absolute control.
+		</p>
+	</header>
 
-	<div class="space-y-6">
+	<!-- Privacy Principles -->
+	<div class="space-y-8">
 		<section>
-			<h2 class="mb-3 font-semibold text-[var(--text-section)]">1. Zero Data Collection Promise</h2>
-			<p class="text-[var(--text-body)]">
-				MonOCR is built from the ground up for absolute privacy. Our edge-AI architecture ensures
-				that <strong
-					>100% of optical character recognition (OCR) processing occurs entirely on your device</strong
-				>.
-			</p>
-			<p class="mt-2 text-[var(--text-body)]">
-				We do not use loud telemetry, we do not require an account, and we do not transmit your
-				photos or documents to any external server.
+			<h2 class="text-fg-primary mb-1 text-base font-bold">1. Local Processing</h2>
+			<p class="text-fg-secondary text-[13px] leading-relaxed">
+				All OCR recognition runs entirely on your local hardware via WASM or WebGPU. Your images are
+				processed in the browser's memory and are never uploaded to our servers for processing.
 			</p>
 		</section>
 
 		<section>
-			<h2 class="mb-3 font-semibold text-[var(--text-section)]">2. Processing of Images</h2>
-			<p class="text-[var(--text-body)]">
-				Any images you select from your library or capture via your camera are loaded straight into
-				the Neural Processing Unit (NPU/CPU) on your local hardware. The original image and the
-				generated text extraction both remain isolated in your device's memory.
+			<h2 class="text-fg-primary mb-1 text-base font-bold">2. Zero Default Collection</h2>
+			<p class="text-fg-secondary text-[13px] leading-relaxed">
+				We do not use telemetry, analytics, or trackers. We do not know who you are, and we do not
+				track how you use the application.
 			</p>
 		</section>
 
 		<section>
-			<h2 class="mb-3 font-semibold text-[var(--text-section)]">
-				3. Voluntary Feedback and Contributions
-			</h2>
-			<p class="text-[var(--text-body)]">
-				If you choose to use the "Feedback" or "Contribute" features within our mobile applications,
-				that data is saved locally to an offline database (using SwiftData or Room) on your device.
-				It is not transmitted anywhere unless you manually choose to export and share those logs or
-				screenshots with our engineering team.
+			<h2 class="text-fg-primary mb-1 text-base font-bold">3. Voluntary Contributions</h2>
+			<p class="text-fg-secondary text-[13px] leading-relaxed">
+				You may choose to share corrected text (Feedback) or new documents (Contributions) to help
+				improve the Mon language model. This is strictly opt-in and handled anonymously via secure
+				synchronization.
 			</p>
 		</section>
 
 		<section>
-			<h2 class="mb-3 font-semibold text-[var(--text-section)]">4. Diagnostic Data</h2>
-			<p class="text-[var(--text-body)]">
-				To maintain our strict privacy compliance, we do not use third-party cloud crash reporters.
-				Diagnostic logs are written to your local file system on a rolling basis. You are in full
-				control of these logs and can export them voluntarily if you encounter bugs.
+			<h2 class="text-fg-primary mb-1 text-base font-bold">4. Data Retention</h2>
+			<p class="text-fg-secondary text-[13px] leading-relaxed">
+				Local history is stored on your device and can be cleared at any time. Anonymized
+				contributions shared with our dataset are retained for model training and cannot be
+				individually identified or removed once pooled.
 			</p>
 		</section>
 
 		<section>
-			<h2 class="mb-3 font-semibold text-[var(--text-section)]">5. Changes to This Policy</h2>
-			<p class="text-[var(--text-body)]">
-				Because we do not collect data, we do not anticipate needing to update this policy often. If
-				fundamental changes to the application architecture occur, we will reflect those in our open
-				source repositories and in-app documentation.
-			</p>
+			<h2 class="text-fg-primary mb-1 text-base font-bold">5. Dataset Framework</h2>
+			<div class="text-fg-secondary space-y-3 text-[13px] leading-relaxed">
+				<p>
+					Contributions are synchronized anonymously via pre-signed, short-lived URLs directly to
+					our secure Cloudflare R2 storage. No personal identifiers (IPs, names, accounts) are
+					associated with these uploads.
+				</p>
+				<p>
+					Consent is managed per-contribution. Revoking consent stops all future synchronizations
+					but does not affect data already contributed to the anonymized research pool.
+				</p>
+			</div>
 		</section>
 
 		<section>
-			<h2 class="mb-3 font-semibold text-[var(--text-section)]">6. Contact Us</h2>
-			<p class="text-[var(--text-body)]">
-				If you have any questions about this privacy statement, please contact the MonDevHub
-				engineering team via our public open source repositories on GitHub.
-			</p>
+			<h2 class="text-fg-primary mb-1 text-base font-bold">6. Global Compliance</h2>
+			<div class="text-fg-secondary text-[13px] leading-relaxed">
+				<p>
+					Our architecture aligns with the **General Data Protection Regulation (GDPR)** and the
+					**California Consumer Privacy Act (CCPA)** by providing users with full access and erasure
+					rights over their local data.
+				</p>
+			</div>
 		</section>
 	</div>
+
+	<footer class="border-border/50 mt-12 border-t pt-4 pb-2">
+		<p class="text-fg-muted font-medium tracking-wide text-[var(--text-meta)]">
+			Effective Date: March 22, 2026 • MonOCR Version 0.2.0
+		</p>
+	</footer>
 </div>

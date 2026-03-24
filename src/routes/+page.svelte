@@ -8,6 +8,7 @@
 	import { feedbackStore } from '$lib/stores/feedback';
 	import { HistorySection } from '$lib/components';
 	import { saveRecord } from '$lib/storage/db';
+	import * as m from '$lib/paraglide/messages';
 	import { goto } from '$app/navigation';
 
 	let engineReady = $state(false);
@@ -69,7 +70,10 @@
 
 	onDestroy(() => {
 		cleanup();
-		if (previewUrl) URL.revokeObjectURL(previewUrl);
+		// Only revoke if we aren't heading to the report page
+		if (previewUrl && !window.location.pathname.includes('/report')) {
+			URL.revokeObjectURL(previewUrl);
+		}
 	});
 
 	async function handleFile(e: CustomEvent<File>) {
@@ -158,8 +162,10 @@
 						text: resultText,
 						processingTime
 					},
-					'ocr-scan'
+					'ocr-scan',
+					false
 				);
+
 				await loadHistory();
 			}
 		} catch (err: unknown) {
@@ -197,8 +203,10 @@
 					text,
 					processingTime
 				},
-				'ocr-scan'
+				'ocr-scan',
+				false
 			);
+
 			await loadHistory();
 		} catch (e: unknown) {
 			console.error(e);
@@ -249,18 +257,23 @@
 		});
 		await goto('/report');
 	}
+
+	// Smart Focus for accessibility and efficiency
+	let copyButton = $state<HTMLButtonElement>();
+	$effect(() => {
+		if (resultText && !loading && copyButton) {
+			copyButton.focus();
+		}
+	});
 </script>
 
 <div class="mx-auto w-full max-w-3xl">
 	<!-- Header -->
-	<header class="mb-8 space-y-4 text-center md:mb-12 md:space-y-6">
+	<header class="mb-6 space-y-2 text-center md:mb-10 md:space-y-4">
 		<p
-			class="text-fg-primary mx-auto mt-2 max-w-2xl leading-tight font-medium tracking-tight text-balance text-[var(--text-title)]"
+			class="text-fg-primary mx-auto mt-2 max-w-xl text-[18px] leading-snug font-medium tracking-tight text-balance sm:text-[20px] md:text-[var(--text-title)]"
 		>
 			Digitize Mon texts effortlessly. High-precision OCR running right in your browser.
-		</p>
-		<p class="text-fg-muted mx-auto max-w-lg font-medium tracking-wide text-[var(--text-meta)]">
-			Requires WebGL/WebGPU acceleration.
 		</p>
 
 		<div class="flex justify-center pt-2">
@@ -269,7 +282,7 @@
 					class="border-border bg-canvas-subtle text-fg-muted inline-flex items-center gap-2 rounded-md border px-3 py-1 text-[11px] font-semibold tracking-wider uppercase"
 				>
 					<div class="bg-fg-muted h-1 w-1 animate-pulse rounded-full"></div>
-					Initializing...
+					{m.main_loading_model()}
 				</div>
 			{:else if error}
 				<div
@@ -291,7 +304,9 @@
 					class="border-border bg-canvas-subtle text-fg-muted inline-flex items-center gap-1.5 rounded-md border px-3 py-1 text-[11px] font-semibold tracking-wider uppercase"
 					in:fade
 				>
-					<div class="h-1 w-1 rounded-full bg-emerald-500/60 dark:bg-emerald-500/40"></div>
+					<div
+						class="animate-pulse-subtle h-1 w-1 rounded-full bg-emerald-500/60 dark:bg-emerald-500/40"
+					></div>
 					System Ready
 				</div>
 			{/if}
@@ -303,7 +318,7 @@
 		{#if !file}
 			<div in:fade={{ duration: 150 }}>
 				<div
-					class="hover:bg-canvas-subtle group border-border relative flex flex-col items-center justify-center rounded-[var(--radius-huge)] border py-4 transition-all duration-150"
+					class="border-border bg-canvas hover:bg-canvas-subtle group hover:border-primary/30 relative flex flex-col items-center justify-center rounded-[var(--radius-huge)] border-2 border-dashed py-12 transition-all duration-300 ease-in-out"
 					ondragover={handleDragOver}
 					ondragleave={handleDragLeave}
 					ondrop={handleDrop}
@@ -319,22 +334,28 @@
 						accept="image/*,application/pdf"
 						class="hidden"
 					/>
+					<div
+						class="bg-primary-action/0 group-hover:bg-primary-action/[0.02] pointer-events-none absolute inset-0 rounded-[var(--radius-huge)] transition-colors"
+					></div>
 
-					<div class="flex flex-col items-center space-y-6 text-center">
+					<div class="relative flex flex-col items-center space-y-4 text-center">
 						<div
-							class="bg-primary/5 group-hover:bg-primary/10 flex h-14 w-14 items-center justify-center rounded-full transition-all duration-300"
+							class="bg-canvas-subtle border-border group-hover:border-primary/20 flex h-16 w-16 items-center justify-center rounded-2xl border transition-all duration-300 group-hover:scale-110 group-hover:shadow-sm"
 						>
 							<span
-								class="material-symbols-outlined text-primary text-2xl font-light transition-transform duration-300 group-hover:scale-110"
+								class="material-symbols-outlined text-fg-muted group-hover:text-primary text-3xl font-light transition-colors duration-300"
 							>
-								upload
+								upload_file
 							</span>
 						</div>
 
-						<div class="space-y-4">
+						<div class="space-y-1.5">
 							<h3 class="text-fg-primary text-base font-semibold tracking-tight">
 								Drop an image or PDF here
 							</h3>
+							<p class="text-fg-secondary text-sm opacity-60">
+								Or click to browse from your device
+							</p>
 						</div>
 					</div>
 				</div>
@@ -342,19 +363,10 @@
 		{:else}
 			<div class="mx-auto flex w-full max-w-2xl flex-col gap-6" in:fly={{ y: 20, duration: 400 }}>
 				<!-- Image Preview -->
-				<div class="flex flex-col space-y-2">
-					<div
-						class="border-border bg-canvas-subtle relative flex min-h-[120px] flex-1 items-center justify-center overflow-hidden rounded-lg border p-3 shadow-sm"
-					>
-						<img src={previewUrl} alt="Preview" class="h-auto max-h-[25vh] w-full object-contain" />
-					</div>
-					<button
-						onclick={reset}
-						class="text-fg-secondary hover:text-fg-primary hover:bg-canvas-subtle border-border bg-canvas flex min-h-[30px] items-center gap-2 rounded-lg border px-3 py-1 text-[11px] font-medium tracking-wide uppercase transition-all"
-						aria-label="Process another image or PDF"
-					>
-						Try another one
-					</button>
+				<div
+					class="border-border bg-canvas-subtle relative flex min-h-[120px] items-center justify-center overflow-hidden rounded-lg border p-3 shadow-sm"
+				>
+					<img src={previewUrl} alt="Preview" class="h-auto max-h-[25vh] w-full object-contain" />
 				</div>
 
 				<!-- Result -->
@@ -364,9 +376,19 @@
 					<div
 						class="border-border bg-canvas-subtle flex items-center justify-between border-b px-5 py-2.5"
 					>
-						<h2 class="section-label mb-0 tracking-[0.4em] text-[var(--text-meta)]">
-							Extracted Text
-						</h2>
+						<div class="flex items-center gap-3">
+							<h2 class="section-label mb-0 tracking-[0.4em] text-[var(--text-meta)]">
+								Extracted Text
+							</h2>
+							<button
+								onclick={reset}
+								class="text-fg-secondary hover:text-fg-primary flex items-center justify-center rounded-full p-1 transition-colors"
+								title="Clear result"
+								aria-label="Clear result"
+							>
+								<span class="material-symbols-outlined text-[18px]">close</span>
+							</button>
+						</div>
 						{#if processingTime > 0 && !loading && resultText}
 							<div
 								class="text-fg-secondary flex items-center gap-2.5 font-mono text-[var(--text-meta)] opacity-80"
@@ -395,7 +417,7 @@
 										class="border-primary-500 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"
 									></div>
 									<span class="text-fg-secondary animate-pulse font-medium text-[var(--text-body)]">
-										Scanning document...
+										{m.main_scanning()}
 									</span>
 								</div>
 							</div>
@@ -411,17 +433,11 @@
 							</div>
 						{:else if loading}
 							<div class="flex flex-col gap-4 opacity-40">
-								<div class="bg-border h-3 w-full animate-pulse rounded-full"></div>
-								<div class="bg-border h-3 w-11/12 animate-pulse rounded-full"></div>
-								<div class="bg-border h-3 w-4/5 animate-pulse rounded-full"></div>
-								<div class="bg-border h-3 w-full animate-pulse rounded-full"></div>
-								<div class="bg-border h-3 w-3/4 animate-pulse rounded-full"></div>
-							</div>
-						{:else}
-							<div
-								class="text-fg-secondary flex h-full items-center justify-center text-[var(--text-body)] italic"
-							>
-								No text extracted
+								<div class="shimmer h-3 w-full rounded-full"></div>
+								<div class="shimmer h-3 w-11/12 rounded-full"></div>
+								<div class="shimmer h-3 w-4/5 rounded-full"></div>
+								<div class="shimmer h-3 w-full rounded-full"></div>
+								<div class="shimmer h-3 w-3/4 rounded-full"></div>
 							</div>
 						{/if}
 					</div>
@@ -436,9 +452,10 @@
 									onclick={downloadText}
 									aria-label="Save extracted text as a file"
 								>
-									Download
+									{m.main_save_text()}
 								</button>
 								<button
+									bind:this={copyButton}
 									class="btn-secondary px-3 py-1"
 									onclick={() => {
 										navigator.clipboard.writeText(resultText || '');
@@ -448,6 +465,14 @@
 									aria-label="Copy extracted text to clipboard"
 								>
 									{copied ? 'Copied' : 'Copy'}
+								</button>
+								<button
+									class="btn-primary px-3 py-1"
+									onclick={reset}
+									aria-label="Process another image or PDF"
+								>
+									<span class="material-symbols-outlined mr-1.5 text-[16px]">add</span>
+									{m.main_process_another()}
 								</button>
 							</div>
 							<div class="flex items-center">
@@ -460,7 +485,7 @@
 										class="material-symbols-outlined text-[16px] opacity-40 group-hover:opacity-100"
 										>flag</span
 									>
-									<span>Report</span>
+									<span>{m.nav_feedback()}</span>
 								</button>
 							</div>
 						</div>
@@ -484,5 +509,21 @@
 	}
 	.font-mon {
 		font-family: 'PyidaungSu', 'Myanmar Text', sans-serif;
+	}
+
+	@keyframes pulse-subtle {
+		0%,
+		100% {
+			opacity: 1;
+			transform: scale(1);
+		}
+		50% {
+			opacity: 0.4;
+			transform: scale(0.9);
+		}
+	}
+
+	:global(.animate-pulse-subtle) {
+		animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 	}
 </style>

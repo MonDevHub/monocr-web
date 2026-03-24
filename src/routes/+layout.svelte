@@ -17,12 +17,14 @@
 	import { logger } from '$lib/logger';
 	import { SEO, Header, Footer } from '$lib/components';
 	import { initLanguage, currentLang } from '$lib/i18n';
+	import { syncService } from '$lib/services/sync-service';
 
 	const { children } = $props();
 
 	onMount(async () => {
 		try {
 			initLanguage();
+			syncService.start();
 		} catch (error) {
 			logger.error('lang init failed:', error);
 		}
@@ -108,7 +110,7 @@
 	lang={$currentLang}
 >
 	<div
-		class="mx-auto flex min-h-screen flex-col px-6 pt-24 pb-12 sm:px-8 sm:pt-32 md:pb-16 lg:px-8 lg:pb-24"
+		class="mx-auto flex min-h-screen flex-col px-4 pt-12 pb-8 sm:px-6 sm:pt-16 md:pb-12 lg:px-8 lg:pb-16"
 	>
 		<a
 			href="#main-content"
@@ -117,9 +119,10 @@
 			Skip to main content
 		</a>
 		<SEO />
-		<div class="flex-1">
+		<div class="flex-1" id="main-content">
 			{@render children?.()}
 		</div>
+
 		<Footer />
 	</div>
 </div>

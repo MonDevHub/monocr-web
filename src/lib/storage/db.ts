@@ -9,6 +9,10 @@ export interface OCRRecord {
 	fileData: Blob;
 	text: string;
 	processingTime: number;
+	isSynced: boolean; // default: false
+	consentGiven: boolean; // default: false
+	syncError?: string | null;
+	syncAttempts: number; // default: 0
 }
 
 export class OCRDatabase extends Dexie {
@@ -16,8 +20,8 @@ export class OCRDatabase extends Dexie {
 
 	constructor() {
 		super('MonOCRDatabase');
-		this.version(1).stores({
-			records: 'id, timestamp, fileName, category'
+		this.version(3).stores({
+			records: 'id, timestamp, fileName, category, isSynced, syncAttempts'
 		});
 	}
 }
@@ -28,14 +32,22 @@ export const db = typeof window !== 'undefined' ? new OCRDatabase() : null;
  * Saves a new OCR record to IndexedDB.
  */
 export async function saveRecord(
-	record: Omit<OCRRecord, 'id' | 'timestamp' | 'category'>,
-	category = 'ocr-scan'
+	record: Omit<
+		OCRRecord,
+		'id' | 'timestamp' | 'category' | 'isSynced' | 'consentGiven' | 'syncError' | 'syncAttempts'
+	>,
+
+	category = 'ocr-scan',
+	consentGiven = false
 ): Promise<string> {
 	if (!db) throw new Error('IndexedDB not available');
 
 	const newRecord: OCRRecord = {
 		...record,
 		category,
+		consentGiven,
+		isSynced: false,
+		syncAttempts: 0,
 		id: crypto.randomUUID(),
 		timestamp: Date.now()
 	};

@@ -1,7 +1,7 @@
 {
 	"name": "monocr-web",
 	"private": true,
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"type": "module",
 	"scripts": {
 		"prepare": "svelte-kit sync || echo ''",
@@ -11,8 +11,8 @@
 		"paraglide": "paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide",
 		"copy-wasm": "node scripts/copy-wasm.mjs",
 		"copy-pdf-worker": "node scripts/copy-pdf-worker.mjs",
-		"build": "node scripts/copy-pdf-worker.mjs && paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && vite build --mode production && rm -f build/monocr.onnx",
-		"build-local": "pnpm run copy-wasm && pnpm run copy-pdf-worker && paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && vite build && rm -f build/monocr.onnx",
+		"build": "paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && vite build --mode production && rm -f .svelte-kit/cloudflare/monocr.onnx",
+		"build-local": "pnpm run copy-wasm && pnpm run copy-pdf-worker && paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && vite build && rm -f .svelte-kit/cloudflare/monocr.onnx",
 		"build:analyze": "pnpm run copy-wasm && pnpm run copy-pdf-worker && paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && vite build --mode production --analyze",
 		"build:minimal": "pnpm run copy-wasm && pnpm run copy-pdf-worker && NODE_ENV=production paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && vite build --mode production --minify terser",
 		"format": "prettier --write . && eslint --fix .",
@@ -37,7 +37,7 @@
 		"@inlang/paraglide-js": "^2.12.0",
 		"@inlang/paraglide-js-adapter-sveltekit": "^0.6.7",
 		"@inlang/paraglide-sveltekit": "^0.16.1",
-		"@sveltejs/adapter-static": "^3.0.10",
+		"@sveltejs/adapter-cloudflare": "^7.2.8",
 		"@sveltejs/enhanced-img": "^0.10.2",
 		"@sveltejs/kit": "^2.52.0",
 		"@sveltejs/vite-plugin-svelte": "^6.2.4",
@@ -84,6 +84,8 @@
 		]
 	},
 	"dependencies": {
+		"@aws-sdk/client-s3": "^3.1014.0",
+		"@aws-sdk/s3-request-presigner": "^3.1014.0",
 		"dexie": "^4.3.0",
 		"onnxruntime-web": "^1.24.3",
 		"pdfjs-dist": "^4.10.38"

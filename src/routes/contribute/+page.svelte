@@ -29,7 +29,8 @@
 					text: transcription,
 					processingTime: 0
 				},
-				'contribution'
+				'contribution',
+				true
 			);
 
 			// Success
@@ -52,7 +53,7 @@
 	<!-- Header removed to use global Header -->
 
 	<main id="main-content" class="flex-1 overflow-y-auto pb-6">
-		<div class="mx-auto max-w-2xl px-6 py-1">
+		<div class="mx-auto max-w-2xl px-6 py-0.5">
 			<header class="mb-4 text-center">
 				<h2 class="text-fg-primary mb-1 font-semibold tracking-tight text-[var(--text-section)]">
 					Preserve Our Heritage
@@ -65,7 +66,7 @@
 			<!-- Section 1: Upload -->
 			<section class="mb-3">
 				<div
-					class="hover:bg-canvas-subtle group border-border relative flex cursor-pointer flex-col items-center justify-center rounded-[var(--radius-huge)] border py-6 transition-all duration-150"
+					class="hover:bg-canvas-subtle group border-border relative flex cursor-pointer flex-col items-center justify-center rounded-[var(--radius-lg)] border py-4 transition-all duration-150"
 					onclick={() => fileInput.click()}
 					onkeydown={(e) => e.key === 'Enter' && fileInput.click()}
 					role="button"

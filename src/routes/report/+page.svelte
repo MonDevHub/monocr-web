@@ -44,38 +44,37 @@
 
 		loading = true;
 		try {
-			// Save to history
-			if (sourceFile) {
-				await saveRecord(
-					{
-						fileName: `Feedback: ${sourceFile.name}`,
-						fileType: sourceFile.type,
-						fileData: sourceFile,
-						text: correctedText,
-						processingTime: 0
-					},
-					'feedback'
-				);
-			} else {
-				// Fallback if no file (e.g. from state)
-				await saveRecord(
-					{
-						fileName: `Feedback: ${selectedType}`,
-						fileType: 'text/plain',
-						fileData: new Blob([originalText], { type: 'text/plain' }),
-						text: correctedText,
-						processingTime: 0
-					},
-					'feedback'
-				);
-			}
+			// 1. Data Contribution Model: Save to local IndexedDB for background sync
+			// We no longer use mailto as the primary bridge; R2 Sync is now the official path.
 
-			// Success
+			// 2. Local Logging: Save to history for user record
+			const timestamp = Date.now();
+			const fileToSave = sourceFile || new Blob([originalText], { type: 'text/plain' });
+			const defaultFileName = `feedback-${timestamp}.txt`;
+
+			await saveRecord(
+				{
+					fileName: sourceFile ? `Feedback: ${sourceFile.name}` : defaultFileName,
+					fileType: sourceFile ? sourceFile.type : 'text/plain',
+					fileData: fileToSave,
+					text: `[${selectedType}] ${correctedText}`,
+					processingTime: 0
+				},
+
+				'feedback',
+				consent
+			);
+
 			showSuccessModal = true;
+
+			// 3. Trigger immediate sync
+			import('$lib/services/sync-service').then(({ syncService }) => {
+				syncService.syncAll();
+			});
+
 			historySection?.refresh();
 		} catch (e) {
 			console.error('Failed to submit feedback:', e);
-			alert('Failed to save feedback history.');
 		} finally {
 			loading = false;
 		}
@@ -92,7 +91,7 @@
 />
 
 <div class="font-display relative flex flex-col overflow-x-hidden">
-	<main id="main-content" class="mx-auto w-full max-w-2xl space-y-3 p-4 md:p-6">
+	<main id="main-content" class="mx-auto w-full max-w-2xl space-y-2 p-3 md:p-4">
 		<!-- Original Source Selection -->
 		<header class="mb-2 space-y-1 text-center">
 			<h1 class="font-bold tracking-tight text-[var(--text-title)]">Accuracy Feedback</h1>
@@ -101,7 +100,7 @@
 		<section>
 			<h3 class="section-label">Original Source</h3>
 			<div
-				class="group border-border bg-canvas-subtle/50 hover:bg-canvas-subtle/80 relative flex cursor-pointer flex-col items-center justify-center rounded-md border border-dashed py-4 transition-all duration-150"
+				class="group border-border bg-canvas-subtle/50 hover:bg-canvas-subtle/80 relative flex cursor-pointer flex-col items-center justify-center rounded-md border border-dashed py-3 transition-all duration-150"
 				onclick={() => sourceFileInput.click()}
 				onkeydown={(e) => e.key === 'Enter' && sourceFileInput.click()}
 				role="button"
@@ -139,12 +138,13 @@
 						<div class="flex flex-col gap-4">
 							{#if previewUrl}
 								<div
-									class="border-border bg-canvas-subtle relative aspect-video w-full overflow-hidden rounded border"
+									class="border-border bg-canvas-subtle relative h-[200px] w-full overflow-hidden rounded border"
 								>
 									<img
 										src={previewUrl}
 										alt="Source Scan"
 										class="absolute inset-0 h-full w-full object-contain"
+										onerror={() => (previewUrl = null)}
 									/>
 								</div>
 							{/if}
