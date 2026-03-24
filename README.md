@@ -1,8 +1,5 @@
 A privacy-focused, in-browser OCR tool for the Mon language (mnw), built with Rust and WebAssembly.
 
-> [!NOTE]
-> This project follows the [Product Quality Constitution](.agents/workflows/constitution.md) for clarity and calmness.
-
 ## Overview
 
 MonOCR Web brings optical character recognition for the Mon script directly to the browser. By leveraging ONNX Runtime Web and a custom Wasm backend, it performs all processing locally on the user's device. This ensures zero data latency and complete privacy—no images are ever sent to a server.
