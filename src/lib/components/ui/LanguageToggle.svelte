@@ -21,7 +21,7 @@
 
 	const languages = [
 		{ id: 'en', label: 'EN', full: 'English' },
-		{ id: 'mm', label: 'ဗမာ', full: 'Burmese' },
+		{ id: 'my', label: 'ဗမာ', full: 'Burmese' },
 		{ id: 'mnw', label: 'မန်', full: 'Mon' }
 	] as const;
 
@@ -65,7 +65,7 @@
 		}
 	});
 
-	async function selectLanguage(newLang: 'en' | 'mm' | 'mnw'): Promise<void> {
+	async function selectLanguage(newLang: 'en' | 'my' | 'mnw'): Promise<void> {
 		if (!browser || disabled || newLang === lang) {
 			isOpen = false;
 			return;

@@ -27,7 +27,9 @@
 		"scan:secrets": "gitleaks detect --source . --verbose",
 		"scan:deps": "pnpm audit",
 		"size": "pnpm run build && du -sh build/* | sort -hr",
-		"ci": "pnpm run format:check && pnpm run lint && pnpm run type-check && pnpm run scan:secrets && pnpm run scan:deps"
+		"ci": "pnpm run format:check && pnpm run lint && pnpm run type-check && pnpm run scan:secrets && pnpm run scan:deps",
+		"parse:gs": "node scripts/parseGoogleSheets.mjs",
+		"parse:locale": "node scripts/parseLocaleFiles.mjs"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^2.0.2",
@@ -46,10 +48,12 @@
 		"@types/node": "^25.2.3",
 		"@vite-pwa/sveltekit": "^1.1.0",
 		"@vitest/browser": "^4.0.18",
+		"dotenv": "^17.4.1",
 		"eslint": "^10.0.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.15.0",
 		"globals": "^17.3.0",
+		"googleapis": "^171.4.0",
 		"playwright": "^1.58.2",
 		"prettier": "^3.8.1",
 		"prettier-plugin-svelte": "^3.4.1",
