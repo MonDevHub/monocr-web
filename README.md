@@ -1,114 +1,113 @@
-A privacy-focused, in-browser OCR tool for the Mon language (mnw), built with Rust and WebAssembly.
+A privacy-first, in-browser OCR engine for the [Mon language](https://en.wikipedia.org/wiki/Mon_language) (mnw), powered by Rust, WebAssembly, and ONNX Runtime.
+
+> [!NOTE]
+> The [Mon language](https://en.wikipedia.org/wiki/Mon_language) is classified as a "vulnerable" language in [UNESCO's Atlas of the World’s Languages in Danger](https://en.wikipedia.org/wiki/Atlas_of_the_World%27s_Languages_in_Danger).
+>
+> This project aims to digitize the Mon script, establishing a digital foundation suitable for future development, system integrations, and AI-driven preservation efforts.
 
 ## Overview
 
-MonOCR Web brings optical character recognition for the Mon script directly to the browser. By leveraging ONNX Runtime Web and a custom Wasm backend, it performs all processing locally on the user's device. This ensures zero data latency and complete privacy—no images are ever sent to a server.
+MonOCR Web brings high-performance optical character recognition for the Mon script directly to the browser. By leveraging **ONNX Runtime Web** and a custom **Wasm** backend, all processing is performed locally on the user's device. This architecture ensures zero latency, offline capability, and absolute privacy—no images ever leave the browser.
 
-## Features
+## Key Features
 
-- **Local Processing**: Runs entirely in the browser using WebAssembly.
-- **Privacy First**: No data collection by default; all OCR processing is 100% local.
-- **Optional Cloud Sync**: Secure, opt-in synchronization for users who wish to contribute their corrected scans to the Mon language dataset.
-- **High Performance**: Optimized MobileNetV3 + BiLSTM OCR engine via ONNX Runtime (~6.6M parameters).
-- **Large File Support**: Supports PDFs and images up to 50MB.
-- **Mon Language Support**: Specialized for recognizing Mon script.
-- **Premium UX**: High-fidelity skeleton loaders and synchronized design system (16px radii, 24px spacing).
+- **On-Device Inference**: Runs entirely in the browser via WebAssembly (Wasm).
+- **Privacy by Design**: Zero data collection; OCR processing is 100% local.
+- **Optional Cloud Sync**: Secure, opt-in synchronization for contributing corrected scans to the open-source Mon language dataset.
+- **High Performance**: Optimized MobileNetV3 + BiLSTM OCR engine (~6.6M parameters).
+- **Format Support**: Handles PDFs and images up to 50MB.
+- **Script Specialized**: Purpose-built for Mon script recognition, with supplementary support for Burmese and English.
+
+> [!TIP]
+> File size is limited to 50MB for web and 20MB for mobile. For processing larger files or leveraging more powerful hardware, please use the CLI or package directly via `uv add monocr` or `pip install monocr`.
+
+## Architecture
+
+```
+Image (Canvas/Blob)
+  LineSegmenter     → horizontal projection profile → List<LineSegment>
+  ImagePreprocessor  → grayscale + normalize [-1.0, 1.0]
+  MonOcrEngine      → ONNX Runtime Web (monocr.onnx)
+  CtcDecoder        → greedy CTC decode → String
+```
+
+### Model Specification
+
+| Attribute    | Specification                  |
+| ------------ | ------------------------------ |
+| Architecture | MobileNetV3 + BiLSTM-384 + CTC |
+| Precision    | FP32 (ONNX)                    |
+| Parameters   | ~6.6M                          |
+| Input        | 128 × Variable (H × W)         |
+| Asset Size   | ~25 MB                         |
+
+## Project Structure
+
+```
+monocr-web/
+├── src/
+│   ├── lib/
+│   │   ├── engine/           # OCR Pipeline (ONNX/Wasm)
+│   │   ├── components/       # Svelte UI Components
+│   │   └── utils/            # Image & PDF Processing
+│   └── routes/               # Application Pages
+├── static/
+│   ├── wasm/                 # ONNX Runtime Wasm Binaries
+│   └── fonts/                # Mon/Myanmar Unicode Fonts
+├── scripts/                  # Build & Asset Management
+└── playwright/               # E2E Testing Suite
+```
 
 ## Ecosystem
 
-MonOCR is a cross-platform ecosystem designed for parity and performance:
+MonOCR is a unified cross-platform ecosystem designed for parity and performance:
 
 - **[MonOCR Web](https://ocr.mondevhub.com)**: (This Repository) Privacy-first in-browser OCR.
 - **[MonOCR Android](https://github.com/janakhpon/monocr-android)**: Native Jetpack Compose app with Material 3.
 - **[MonOCR iOS](https://github.com/janakhpon/monocr-ios)**: Native SwiftUI app with SwiftData persistence.
 
-## Quality Standards
-
-This project is certified **Production Ready** and strictly adheres to:
-
-- [x] Product Quality Constitution: Compact, Calm, Modern.
-- [x] Privacy-First Engineering: 100% on-device processing.
-- [x] Design System Convergence: Identical corner radii, spacing, and typography across all screens.
-- [x] Real-World Feedback: Integrated unified feedback bridges for model improvement.
-- [x] Compliance: Designed for GDPR and CCPA alignment with transparent opt-in data contribution.
-
-## Resources
-
-### Models & Data
-
-- [Hugging Face Models](https://huggingface.co/Janakh/monocr) (CKPT, ONNX, ML, RTen)
-
-### SDKs & Packages
-
-- [Unified SDKs](https://github.com/janakhpon/monocr-onnx)
-- [NPM Package](https://www.npmjs.com/package/monocr)
-- [PyPI - Raw](https://pypi.org/project/monocr/)
-- [PyPI - ONNX](https://pypi.org/project/monocr-onnx/)
-- [Go Package](github.com/MonDevHub/monocr-onnx/go)
-- [Tokenizer](https://github.com/Code-Yay-Mal/mon_tokenizer)
-
 ## Development
 
-### 1. Install Dependencies
+### Prerequisites
+
+- **Node.js** 24+
+- **pnpm** 11+
+
+### 1. Setup
 
 ```bash
 pnpm install
 ```
 
-### 2. Prepare Local Assets (WASM)
+### 2. Prepare Assets
 
-To run locally, we need to copy the pre-built ONNX Runtime WASM files from `node_modules` to `static/wasm/`.
+Copy the pre-built ONNX Runtime WASM files to the static directory:
 
 ```bash
 pnpm run copy-wasm
 ```
 
-### 3. Start Dev Server
+### 3. Local Development
 
 ```bash
 pnpm dev
-# Note: This automatically runs copy-wasm before starting
 ```
 
-## Building for Production
-
-To create a production build (static site):
+### 4. Production Build
 
 ```bash
 pnpm build
 ```
 
-**Note**: The build script automatically removes the large `monocr.onnx` model from the output to comply with Cloudflare's 25MB asset limit. In production, the model is fetched directly from Hugging Face.
+> [!IMPORTANT]
+> The build script automatically optimizes the `monocr.onnx` model deployment to comply with edge asset limits. In production, models are fetched from the HuggingFace CDN.
 
-## Deployment (Cloudflare Pages)
+## Resources
 
-This project is optimized for **Cloudflare Pages**.
-
-1.  **Build Command**: `pnpm build`
-2.  **Output Directory**: `build`
-3.  **WASM Assets**: Included automatically via `static/wasm/` (ensure these are committed to git).
-4.  **Model**: Served from Hugging Face (configured in `src/lib/config.ts`).
-
-### Manual Deploy (Wrangler)
-
-If you have `wrangler` installed/configured:
-
-```bash
-npx wrangler deploy
-```
-
-(This uses the `wrangler.json` configuration to deploy the `build` folder).
-
-### 4. Cloud Sync Configuration (Optional)
-
-To enable the dataset contribution feature, you must configure the following Cloudflare Environment Variables:
-
-- `R2_ACCESS_KEY_ID`: Cloudflare R2 Access Key.
-- `R2_SECRET_ACCESS_KEY`: Cloudflare R2 Secret Key.
-- `R2_ACCOUNT_ID`: Your Cloudflare Account ID.
-- `R2_BUCKET_NAME`: The name of your R2 bucket (default: `monocr-dataset`).
-
-These can be set in the **Cloudflare Pages Dashboard** under `Settings > Functions > Variables`.
+- [HuggingFace Models](https://huggingface.co/janakhpon/monocr) (ONNX, Core ML, TFLite)
+- [Unified SDKs](https://github.com/janakhpon/monocr-onnx)
+- [NPM Package](https://www.npmjs.com/package/monocr)
+- [Help contribute to copy/translations here](https://docs.google.com/spreadsheets/d/1sr8WtiMEyDuDd1amI-wzAz5d2acZlVC7zOZMqixOADQ/edit?usp=sharing)
 
 ## License
 
