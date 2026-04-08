@@ -63,8 +63,8 @@ monocr-web/
 MonOCR is a unified cross-platform ecosystem designed for parity and performance:
 
 - **[MonOCR Web](https://ocr.mondevhub.com)**: (This Repository) Privacy-first in-browser OCR.
-- **[MonOCR Android](https://github.com/janakhpon/monocr-android)**: Native Jetpack Compose app with Material 3.
-- **[MonOCR iOS](https://github.com/janakhpon/monocr-ios)**: Native SwiftUI app with SwiftData persistence.
+- **[MonOCR Android](https://github.com/MonDevHub/ocr-android)**: Native Jetpack Compose app with Material 3.
+- **[MonOCR iOS](https://github.com/MonDevHub/ocr-ios)**: Native SwiftUI app with SwiftData persistence.
 
 ## Development
 
