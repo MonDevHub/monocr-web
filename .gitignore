@@ -156,3 +156,21 @@ Thumbs.db
 _agents/
 _agent/
 brain/
+
+# Rust build output.
+#
+# `ocr-engine/target/` was TRACKED: 2,371 files and 603 MB, against roughly 120
+# files of actual source -- so 95% of this repository by file count, and almost
+# all of it by size, was regenerable build cache. It also churned on its own:
+# `target/flycheck*/stdout` and `stderr` are the editor's lint output and showed
+# up as uncommitted changes after simply opening the project.
+#
+# Nothing depends on it. The wasm this site actually serves is committed at
+# `static/wasm/`; the .wasm files under target/ are intermediates from the same
+# build. The only other reference is .prettierignore, which is itself an
+# exclusion.
+#
+# Untracking does not delete anything from disk, and it does not shrink the
+# repository: those blobs stay in history and only a rewrite removes them, which
+# is not this commit's call.
+ocr-engine/target/
