@@ -1,7 +1,7 @@
 {
 	"name": "MonOCR",
 	"short_name": "MonOCR",
-	"description": "Private Mon Language OCR. Optimized for high-accuracy archival digitization, running entirely in your browser.",
+	"description": "Private Mon language OCR for archival digitization, running entirely in your browser.",
 	"start_url": "/",
 	"display": "standalone",
 	"background_color": "#fcfbf9",

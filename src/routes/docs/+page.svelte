@@ -47,7 +47,7 @@
 </script>
 
 <SEO
-	title="Documentation - MonOCR Professional Academic OCR"
+	title="Documentation - MonOCR"
 	description="Comprehensive guide for MonOCR engine, including installation, image quality standards, and technical architecture."
 />
 
@@ -171,7 +171,7 @@
 					<section id="introduction" class="mb-10">
 						<h1 class="mb-3 font-bold tracking-tight text-[var(--text-title)]">Documentation</h1>
 						<p class="text-fg-muted leading-relaxed text-[var(--text-section)]">
-							Academic-grade OCR engine for Mon script. High-performance, private, and localized.
+							On-device OCR engine for Mon script. Private and localized.
 						</p>
 					</section>
 
@@ -230,7 +230,7 @@ print(text)</pre>
 					<section class="mb-12 scroll-mt-24" id="image-quality">
 						<h2 class="mb-4 text-2xl font-bold">Input Standards</h2>
 						<p class="text-fg-secondary mb-8">
-							Follow these standards to achieve maximum recognition accuracy (97.5%+).
+							Follow these standards to get the best recognition.
 						</p>
 						<div class="grid gap-6 sm:grid-cols-2">
 							<!-- Resolution Card -->
@@ -399,8 +399,8 @@ print(text)</pre>
 						<header class="mb-8">
 							<h1 class="mb-3 text-2xl font-bold tracking-tight">Multi-Platform SDKs</h1>
 							<p class="text-fg-muted text-base leading-relaxed">
-								Official libraries for high-performance inference. Optimized for archival
-								digitization and research.
+								Official libraries for running MonOCR outside the browser, for archival digitization
+								and research.
 							</p>
 						</header>
 

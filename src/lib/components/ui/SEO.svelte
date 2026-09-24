@@ -13,7 +13,7 @@
 
 	const {
 		title = 'Mon OCR - Mon (mnw) Language Recognition',
-		description = 'OCR model for digitalizing Mon (mnw) language. Fast, private, and high-accuracy recognition running entirely in your browser.',
+		description = 'OCR model for digitalizing Mon (mnw) language. Private, on-device recognition running entirely in your browser.',
 		keywords = 'Mon, Mon (mnw), Mon OCR, MonOCR, monocr, mon ocr, mon language, ocr model, language preservation',
 		image = '/og-image.jpg',
 		type = 'website',
