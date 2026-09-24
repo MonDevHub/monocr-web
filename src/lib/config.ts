@@ -1,6 +1,9 @@
 export const CONFIG = {
 	MODELS: {
-		RECOGNITION: 'https://huggingface.co/janakhpon/monocr/resolve/main/onnx/monocr.onnx',
+		// Model v2 at a pinned revision. `main` now serves v3.5 (160px input, 277
+		// classes), which does not match this app's 128px input or charset.txt.
+		// Keep in step with functions/monocr.onnx.js.
+		RECOGNITION: 'https://huggingface.co/janakhpon/monocr/resolve/a51be11/onnx/monocr.onnx',
 		CHARSET: '/charset.txt'
 	},
 	WORKER: {

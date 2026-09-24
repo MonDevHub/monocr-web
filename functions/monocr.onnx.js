@@ -1,5 +1,8 @@
 export async function onRequest(context) {
-	const MODEL_URL = 'https://huggingface.co/janakhpon/monocr/resolve/main/onnx/monocr.onnx';
+	// Pinned to a model v2 revision, not `main` (which serves v3.5 since
+	// 2026-08-15). A moving branch also broke the `immutable` header below.
+	// Keep in step with src/lib/config.ts.
+	const MODEL_URL = 'https://huggingface.co/janakhpon/monocr/resolve/a51be11/onnx/monocr.onnx';
 
 	try {
 		// Fetch with redirect following (default behavior)
@@ -17,7 +20,7 @@ export async function onRequest(context) {
 			});
 		}
 
-		// Stream the response body directly (don't buffer the 55MB file)
+		// Stream the response body directly (don't buffer the ~26 MB v2 model)
 		return new Response(response.body, {
 			status: 200,
 			headers: {

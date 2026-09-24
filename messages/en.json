@@ -14,7 +14,7 @@
 	"about_title": "About MonOCR",
 	"about_vulnerable": "Mon (mnw) is my mother tongue. It is currently classified as a vulnerable language by UNESCO.",
 	"about_digital_presence": "The biggest challenge is the lack of digital presence for Mon. This makes AI development difficult since most texts are in scanned books.",
-	"about_effort": "To increase digital presence, I developed this OCR engine. It uses MobileNetV3 + BiLSTM for efficient inference.",
+	"about_effort": "To increase digital presence, I developed this OCR engine. It uses MobileNetV3 + BiLSTM (model v2) for efficient inference.",
 	"about_inference": "The engine uses ONNX Runtime Web to run locally in your browser. Your data never leaves your device.",
 	"about_hope": "MonOCR aims to bridge the gap between physical texts and digital data, enabling new educational possibilities.",
 	"docs_title": "Documentation",
