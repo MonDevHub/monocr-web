@@ -1,3 +1,9 @@
+> [!IMPORTANT]
+> **Superseded.** This repository is the earlier (v2) MonOCR web app, kept for history. The web app now
+> lives in [MonDevHub/monocr](https://github.com/MonDevHub/monocr) (`apps/web`), and the live site is
+> [ocr.mondevhub.com](https://ocr.mondevhub.com). The model figures below describe the v2 model, not the
+> current one.
+
 A privacy-first, in-browser OCR engine for the [Mon language](https://en.wikipedia.org/wiki/Mon_language) (mnw), powered by Rust, WebAssembly, and ONNX Runtime.
 
 > [!NOTE]
@@ -7,14 +13,14 @@ A privacy-first, in-browser OCR engine for the [Mon language](https://en.wikiped
 
 ## Overview
 
-MonOCR Web brings high-performance optical character recognition for the Mon script directly to the browser. By leveraging **ONNX Runtime Web** and a custom **Wasm** backend, all processing is performed locally on the user's device. This architecture ensures zero latency, offline capability, and absolute privacy—no images ever leave the browser.
+MonOCR Web brings optical character recognition for the Mon script directly to the browser. By leveraging **ONNX Runtime Web** and a custom **Wasm** backend, all processing is performed locally on the user's device. Images are not sent to a server for recognition, and once the model is cached the app works offline. Files leave the browser only if the user opts in to Cloud Sync.
 
 ## Key Features
 
 - **On-Device Inference**: Runs entirely in the browser via WebAssembly (Wasm).
-- **Privacy by Design**: Zero data collection; OCR processing is 100% local.
+- **Local by Default**: OCR runs on the device. Nothing is uploaded unless the user turns on Cloud Sync.
 - **Optional Cloud Sync**: Secure, opt-in synchronization for contributing corrected scans to the open-source Mon language dataset.
-- **High Performance**: Optimized MobileNetV3 + BiLSTM OCR engine (~6.6M parameters).
+- **Model (v2, historical)**: MobileNetV3 + BiLSTM OCR engine (~6.6M parameters).
 - **Format Support**: Handles PDFs and images up to 50MB.
 - **Script Specialized**: Purpose-built for Mon script recognition, with supplementary support for Burmese and English.
 
@@ -31,7 +37,11 @@ Image (Canvas/Blob)
   CtcDecoder        → greedy CTC decode → String
 ```
 
-### Model Specification
+### Model Specification (v2, historical)
+
+This table describes the v2 model this repository ships, pinned to Hugging Face revision
+[`a51be11`](https://huggingface.co/janakhpon/monocr/tree/a51be11) (`src/lib/config.ts`). For the current
+model (v3.5, 11.55M parameters), see the [MonOCR model card](https://huggingface.co/janakhpon/monocr).
 
 | Attribute    | Specification                  |
 | ------------ | ------------------------------ |
@@ -47,24 +57,25 @@ Image (Canvas/Blob)
 monocr-web/
 ├── src/
 │   ├── lib/
-│   │   ├── engine/           # OCR Pipeline (ONNX/Wasm)
+│   │   ├── monocr-onnx.ts    # OCR Pipeline (ONNX/Wasm)
 │   │   ├── components/       # Svelte UI Components
 │   │   └── utils/            # Image & PDF Processing
 │   └── routes/               # Application Pages
+├── ocr-engine/               # Rust/Wasm engine (rten + ocrs)
+├── functions/                # Cloudflare Pages model proxy
 ├── static/
 │   ├── wasm/                 # ONNX Runtime Wasm Binaries
 │   └── fonts/                # Mon/Myanmar Unicode Fonts
-├── scripts/                  # Build & Asset Management
-└── playwright/               # E2E Testing Suite
+└── scripts/                  # Build & Asset Management
 ```
 
 ## Ecosystem
 
-MonOCR is a unified cross-platform ecosystem designed for parity and performance:
+The web, Android and iOS apps now live together in [MonDevHub/monocr](https://github.com/MonDevHub/monocr):
 
-- **[MonOCR Web](https://ocr.mondevhub.com)**: (This Repository) Privacy-first in-browser OCR.
-- **[MonOCR Android](https://github.com/MonDevHub/ocr-android)**: Native Jetpack Compose app with Material 3.
-- **[MonOCR iOS](https://github.com/MonDevHub/ocr-ios)**: Native SwiftUI app with SwiftData persistence.
+- **Web**: live at [ocr.mondevhub.com](https://ocr.mondevhub.com), built from `apps/web` (this repository is its predecessor).
+- **Android**: native Jetpack Compose app in `apps/android`. It is not in Google Play yet, so build it from source.
+- **iOS**: native SwiftUI app in `apps/ios`. It is not in the App Store yet, so build it from source.
 
 ## Development
 
@@ -104,7 +115,7 @@ pnpm build
 
 ## Resources
 
-- [HuggingFace Models](https://huggingface.co/janakhpon/monocr) (ONNX, Core ML, TFLite)
+- [HuggingFace Models](https://huggingface.co/janakhpon/monocr) (ONNX, Core ML)
 - [Unified SDKs](https://github.com/janakhpon/monocr-onnx)
 - [NPM Package](https://www.npmjs.com/package/monocr)
 - [Help contribute to copy/translations here](https://docs.google.com/spreadsheets/d/1sr8WtiMEyDuDd1amI-wzAz5d2acZlVC7zOZMqixOADQ/edit?usp=sharing)
